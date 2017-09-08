@@ -3,6 +3,7 @@
 *.sublime-project
 *.sublime-workspace
 
+/use_pypi
 /tests
 /issues
 /build
