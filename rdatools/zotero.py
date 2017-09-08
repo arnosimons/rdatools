@@ -27,14 +27,14 @@ along with RDAtools.  If not, see <http://www.gnu.org/licenses/>.
 
 
 import os
-import pyzotero
+from pyzotero import zotero
 from rdatools.functions import *
 
 
 class Zotero_collection(object):
 	def __init__(self, library_id, library_type, api_key, collectionID):
 		### connection
-		self.conn = pyzotero.zotero.Zotero(library_id, library_type, api_key)
+		self.conn = zotero.Zotero(library_id, library_type, api_key)
 		### attributes
 		self.library_id = library_id
 		self.library_type = library_type

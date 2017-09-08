@@ -3,6 +3,7 @@
 *.sublime-project
 *.sublime-workspace
 
+/tests
 /build
 /dist
 /rdatools.egg-info
