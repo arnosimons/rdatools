@@ -12,6 +12,10 @@ from setuptools import setup, find_packages
 from codecs import open
 import os.path
 
+
+
+VERSION = '0.1.3'
+
 __dir__ = os.path.abspath(os.path.dirname(__file__))
 
 # Get the long description from the README file
@@ -25,14 +29,14 @@ setup(
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version='0.1.2',
+    version=VERSION,
 
     description='tools for relational discourse analysis',
     long_description=long_description,
 
     # The project's main homepage.
     url='https://github.com/arnosimons/rdatools',
-    download_url = 'https://github.com/arnosimons/rdatools/archive/0.1.2.tar.gz',
+    download_url = 'https://github.com/arnosimons/rdatools/archive/{}.tar.gz'.format(VERSION),
 
     # Author details
     author='Arno Simons',
