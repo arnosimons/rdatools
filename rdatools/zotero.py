@@ -27,7 +27,7 @@ along with RDAtools.  If not, see <http://www.gnu.org/licenses/>.
 
 
 import os
-import pyzotero.zotero
+import pyzotero
 from rdatools.functions import *
 
 

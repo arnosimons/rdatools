@@ -1,4 +1,8 @@
+*.pyc
 *.DS_Store
 *.sublime-project
 *.sublime-workspace
 
+/build
+/dist
+/rdatools.egg-info

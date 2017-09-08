@@ -31,8 +31,8 @@ import textract
 import textacy
 import collections
 import itertools
-import ftfy.fix_text
-import warnings.warn
+import ftfy
+import warnings
 from rdatools.constants import *
 from rdatools.constants import _YEAR
 import networkx as nx

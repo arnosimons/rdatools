@@ -30,9 +30,9 @@ import re
 import subprocess
 import textacy
 import networkx as nx
-import warnings.warn
-import distance.nlevenshtein
-import unicodedata.normalize
+import warnings
+import distance
+import unicodedata
 
 from rdatools.constants import *
 from rdatools.functions import *
