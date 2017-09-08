@@ -4,6 +4,7 @@
 *.sublime-workspace
 
 /tests
+/issues
 /build
 /dist
 /rdatools.egg-info
