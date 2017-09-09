@@ -67,7 +67,7 @@ FORBIDDENKEYS = [
 	u'manual_if',
 	]
 NOFIRSTNAME = u'_firstname'
-# NONAMECHARS = (c for c in u',.?!@#$%^&*()+=:;"\'`~') # append more chars!
+# NONAMECHARS = (c for c in u',.?!@#$%^&*()+=:;"\'`~') # more chars?
 
 
 RE_ESCAPE = re.compile(r'|'.join([r"(\\)'",r'(\\)"']))
@@ -80,7 +80,7 @@ RE_AMP = re.compile(r'&amp;')
 RE_CIT_LINEBREAKS = re.compile(r'<br />|<br>|<br/>|\r|\v')
 RE_LINEBREAKS = re.compile(r'<br />|<br>|<br/>|\r|\v|\n')
 RE_DOUBLE_SPACE = re.compile(r'\s+')
-RE_CLEAN_DOUBLELINEBREAK = re.compile(r'\n([\s]*\n)') # why the yellow brackets? Can't they go?
+RE_CLEAN_DOUBLELINEBREAK = re.compile(r'\n([\s]*\n)') # yellow brackets needed?
 RE_EMPTY_END_OF_STRING = re.compile(r'\n[\s]*$')
 RE_EMPTY_END_OF_LINE = re.compile(r'[ \t]+\n')
 RE_FORTHCOMING = re.compile(r'forthcoming|Forthcoming|FORTHCOMING|'\
@@ -106,14 +106,17 @@ _DAYOFMONTH = r'(?:0*[1-9]|1\d|2\d|30|31)'
 
 _DATE_MY = r' '.join([_MONTH, _RECENTYEAR])
 _DATE_DMY = r' '.join([_DAYOFMONTH, _MONTH, _RECENTYEAR])
-_DATE_DMY_NUM = r'(?:0*[1-9]|1\d|2\d|30|31)(?:/|-)(?:0*[1-9]|1[012])(?:/|-)(?:19|20)\d\d'
+_DATE_DMY_NUM = \
+	r'(?:0*[1-9]|1\d|2\d|30|31)(?:/|-)(?:0*[1-9]|1[012])(?:/|-)(?:19|20)\d\d'
 
 _DATE_MDY = r' '.join([_MONTH, _DAYOFMONTH+r',*', _RECENTYEAR])
 _DATE_YMD = r' '.join([_RECENTYEAR, _MONTH, _DAYOFMONTH])
-_DATE_YMD_NUM = r'(?:19|20)\d\d(?:/|-)(?:0*[1-9]|1[012])(?:/|-)(?:0*[1-9]|1\d|2\d|30|31)'
+_DATE_YMD_NUM = \
+	r'(?:19|20)\d\d(?:/|-)(?:0*[1-9]|1[012])(?:/|-)(?:0*[1-9]|1\d|2\d|30|31)'
 
 
-_DATE_ALL = r'|'.join([_DATE_MY, _DATE_DMY, _DATE_YMD, _DATE_MDY, _DATE_YMD_NUM, _DATE_DMY_NUM])
+_DATE_ALL = r'|'.join(
+	[_DATE_MY, _DATE_DMY, _DATE_YMD, _DATE_MDY, _DATE_YMD_NUM, _DATE_DMY_NUM])
 
 
 
@@ -126,7 +129,7 @@ RE_YEAR = re.compile(r'\b'+_YEAR+r'\b')
 RE_RECENTYEAR = re.compile(r'\b'+_RECENTYEAR+r'\b')
 RE_DAYOFMONTH = re.compile(r'\b'+_DAYOFMONTH+r'\b')
 
-RE_VALID_DATE = re.compile(u'^'+_YEAR+'|'+_DATE_ALL+'$') # add other formats here?
+RE_VALID_DATE = re.compile(u'^'+_YEAR+'|'+_DATE_ALL+'$') # other formats?
 
 
 RE_VALID_FIRSTNAME = re.compile(u'^[-a-zßäëïöüáéíóúàèìòùâêîôûøæå \.]*$') # more chars?
@@ -135,4 +138,4 @@ _NAME = u'[a-zßäëïöüáéíóúàèìòùâêîôûøæå][-a-zßäëïöü
 RE_VALID_NAME = re.compile(u'^'+_NAME+'$') # more chars?
 
 RE_VALID_A_LABEL = re.compile(u'^'+_NAME+'\**$') # more chars?
-RE_VALID_U_LABEL = re.compile(u'^'+_YEAR+'_*((?<=_).*)\**$') # add other formats here?
+RE_VALID_U_LABEL = re.compile(u'^'+_YEAR+'_*((?<=_).*)\**$') # other formats ?

@@ -30,6 +30,7 @@ import re
 import subprocess
 import textacy
 import networkx as nx
+import gensim
 import warnings
 import distance
 import unicodedata
@@ -71,13 +72,18 @@ class Discourse(object):
 
 	def _nodes(self, data=True, manual_if=u'', **kwargs):
 		out_type = u'(nid, attr)' if data else u'nid'
-		condition = u' and '.join((u'u"{0}" in attr and attr[u"{0}"] == u"""{1}"""'.format(k,v.replace('"',"'")) for k,v in kwargs.iteritems())) # u'''{}''' needed to deal with multiline concepts!		
+		condition = u' and '.join(
+			(u'u"{0}" in attr and attr[u"{0}"] == u"""{1}"""'.format(
+			k,v.replace('"',"'")) 
+		for k,v in kwargs.iteritems()))	
 		if manual_if:
 			condition = manual_if
 			if kwargs:
-				print u'Key word arguments are ignored because "manual_if" condition is specified'
-		command = u"nodes = [{} for nid, attr in self._graph.nodes_iter(data=True) "\
-				"{}]".format(out_type, u' if {}'.format(condition) if condition else u'')
+				print u'Key word arguments are ignored because "manual_if" '\
+				'condition is specified'
+		command = u"nodes = [{} for nid, attr in self._graph.nodes_iter(data="\
+			"True) {}]".format(out_type, u' if {}'.format(condition) 
+			if condition else u'')
 		exec(command)
 		return nodes
 
@@ -95,13 +101,16 @@ class Discourse(object):
 		return self.actors(a_type=u'person')
 
 	def authors(self, **attr):
-		return self._nodes(manual_if=u'self.utterances_actors(edge_attr={u"actor":nid, u"relation":u"author"})')
+		return self._nodes(manual_if=u'self.utterances_actors(edge_attr='\
+			'{u"actor":nid, u"relation":u"author"})')
 
 	def editors(self, **attr):
-		return self._nodes(manual_if=u'self.utterances_actors(edge_attr={u"actor":nid, u"relation":u"editor"})')
+		return self._nodes(manual_if=u'self.utterances_actors(edge_attr='\
+			'{u"actor":nid, u"relation":u"editor"})')
 
 	def contributors(self, **attr):
-		return self._nodes(manual_if=u'self.utterances_actors(edge_attr={u"actor":nid, u"relation":u"contributor"})')
+		return self._nodes(manual_if=u'self.utterances_actors(edge_attr='\
+			'{u"actor":nid, u"relation":u"contributor"})')
 
 	def add_actor(self, ignore=False, **attr):
 		'''
@@ -110,7 +119,7 @@ class Discourse(object):
 		Lastname  (only for persons)
 		Name overwrites firstname/lastname if actor is a person
 		'''
-		# initialize attributes: clean, make unicode, delete empty kv pairs, check formatting
+		# initialize attributes:
 		attr = clean_attr(attr) 
 		attr[u'kind'] = u'actor'
 		check_attr_format(attr) 
@@ -157,12 +166,12 @@ class Discourse(object):
 			else:
 				raise KeyError(u"Actor already exists. Did you mean update?")
 		attr[u'label'] = self._make_label_unique(attr[u'name'])
-		self._graph.add_node(attr[u'label'], **attr) # Note that label also appears as attr now!
+		self._graph.add_node(attr[u'label'], **attr) # label also appears as attr now!
 		return attr[u'label']
 			
 
 	def update_actor(self, label, merge=False, **attr):
-		# initialize attributes: clean, make unicode, delete empty kv pairs, check formatting
+		# initialize attributes: 
 		special_case = False # Flag for special cases
 		attr = clean_attr(attr)
 		if not attr:
@@ -193,13 +202,16 @@ class Discourse(object):
 			elif (
 				all(k in attr.iterkeys() for k in [u'firstname', u'lastname']) 
 				or (
-					u'lastname' in attr.iterkeys() and u'firstname' in new_attr.iterkeys()
+					u'lastname' in attr.iterkeys() 
+					and u'firstname' in new_attr.iterkeys()
 					)
 				or (
-					u'firstname' in attr.iterkeys() and u'lastname' in new_attr.iterkeys()
+					u'firstname' in attr.iterkeys() 
+					and u'lastname' in new_attr.iterkeys()
 					)
 				):
-				new_attr[u'name'] = ', '.join([new_attr[u'lastname'], new_attr[u'firstname']])
+				new_attr[u'name'] = ', '.join(
+					[new_attr[u'lastname'], new_attr[u'firstname']])
 
 			elif u'lastname' in attr.iterkeys():
 				new_attr[u'name'] = new_attr[u'lastname']
@@ -212,14 +224,16 @@ class Discourse(object):
 		else:
 			if u'firstname' in new_attr.iterkeys():
 				if u'firstname' in attr.iterkeys():
-					warnings.warn(u'firstname ignored because actor is not a person')
-				# Delete key here and in existing node!!!
+					warnings.warn(
+						u'firstname ignored because actor is not a person')
+				# Delete key here and in existing node
 				del new_attr[u'firstname']
 				del self._graph.node[old_attr[u'label']][u'firstname']
 			if u'lastname' in new_attr.iterkeys():
 				if u'lastname' in attr.iterkeys():
-					warnings.warn(u'lastname ignored because actor is not a person')
-				# Delete key here and in existing node!!!
+					warnings.warn(
+						u'lastname ignored because actor is not a person')
+				# Delete key here and in existing node
 				del new_attr[u'lastname']
 				del self._graph.node[old_attr[u'label']][u'lastname']
 		# handle node and label stuff
@@ -229,7 +243,8 @@ class Discourse(object):
 				if merge:
 					pass # 1) change all references of old node to (existing) target 2) delete old node
 				else:
-					raise KeyError(u"Utterance already exists. Did you mean merge?")
+					raise KeyError(
+						u"Utterance already exists. Did you mean merge?")
 			new_attr[u'label'] = self._make_label_unique(new_attr[u'name'])
 			# relabel the node itself
 			mapping={old_attr[u'label']: new_attr[u'label']}
@@ -275,7 +290,7 @@ class Discourse(object):
 		# initialize attributes: clean, make unicode, delete empty kv pairs, check formatting
 		attr = clean_attr(attr)
 		attr[u'kind'] = u'utterance'
-		check_attr_format(attr) # Check if that works for title!!!
+		check_attr_format(attr)
 		# edit attributes: add/check utterance specific kv pairs		
 		if not all(k in attr.iterkeys() for k in [u'title', u'date']):
 			raise ValueError(u"Provide title and date!")
@@ -284,10 +299,12 @@ class Discourse(object):
 			node_exists = self._node_exists(attr)
 			if node_exists:
 				if ignore:
-					warnings.warn(u'Utterance already exists. Did you mean update?')
+					warnings.warn(
+						u'Utterance already exists. Did you mean update?')
 					return node_exists
 				else:
-					raise KeyError(u"Utterance already exists. Did you mean update?")
+					raise KeyError(
+						u"Utterance already exists. Did you mean update?")
 		attr[u'label'] = self._make_label_unique(
 			make_u_label(date=attr['date'], title=attr[u'title']))
 		self._graph.add_node(attr[u'label'], **attr)
@@ -299,7 +316,7 @@ class Discourse(object):
 		if not attr:
 			raise ValueError(u"No attributes specified")
 		attr[u'kind'] = u'utterance'
-		check_attr_format(attr) # Check if that works for title!!!
+		check_attr_format(attr)
 		# edit attributes: add/check utterance specific kv pairs
 		label = unicode(label.lower().strip())
 		if label not in self._graph:
@@ -316,21 +333,24 @@ class Discourse(object):
 				new_attr[u'title'] = old_attr[u'title']
 			if not u'date' in attr.iterkeys():
 				new_attr[u'date'] = old_attr[u'date']
-			if not (new_attr[u'title'] == old_attr[u'title'] and new_attr[u'date'] == old_attr[u'date']):
+			if not (new_attr[u'title'] == old_attr[u'title'] 
+				and new_attr[u'date'] == old_attr[u'date']):
 				del new_attr[u'label'] # To test (below) if node with identical attributes already exists. But don't del before, since old_attr == new_attr (above) wouldn't work
 				if self._node_exists(new_attr) and not allow_doubles:
 					# raise KeyError(u"An utterance with identical attributes already exists. Did you mean merge?")
 					if merge:
 						pass # 1) change all references of old node to (existing) target 2) delete old node
 					else:
-						raise KeyError(u"Utterance already exists. Did you mean merge?")
+						raise KeyError(
+							u"Utterance already exists. Did you mean merge?")
 				new_attr[u'label'] = self._make_label_unique(
 					make_u_label(date=new_attr['date'], title=new_attr[u'title']))
 				# relabel the node itself
 				mapping={old_attr[u'label']: new_attr[u'label']}
 				nx.relabel_nodes(self._graph, mapping, copy=False) 
 				# relabel references to the node in edge attributes
-				for i in self.utterances_actors(edge_attr={u'utterance':old_attr[u'label']}):
+				for i in self.utterances_actors(
+					edge_attr={u'utterance':old_attr[u'label']}):
 					self._graph[i[0]][i[1]][i[2]][u'utterance']=new_attr[u'label']
 				for i in self.citations(edge_attr={u'citing':old_attr[u'label']}):
 					self._graph[i[0]][i[1]][i[2]][u'citing']=new_attr[u'label']
@@ -345,22 +365,27 @@ class Discourse(object):
 	### edge level methods
 	##########################################################################
 
-	def _edges(self, source_attr={}, target_attr={}, edge_attr={}, edge_attr_eqllrgrthn={}, data=True, keys=True):
+	def _edges(self, source_attr={}, target_attr={}, edge_attr={}, 
+		edge_attr_ge={}, data=True, keys=True):
 		out_type = u'(s, t, key, attr)' if data and keys \
 				else u'(s, t, attr)' if data and not keys \
 				else u'(s, t)'
 		source_attr = u' and '.join(
-			(u'(u"{0}" in self._graph.node[s].iterkeys() and self._graph.node[s][u"{0}"] == u"""{1}""")'.format(k,v.replace('"',"'")) # replace to avoid syntax errors if ''' can be found in concepts   
+			(u'(u"{0}" in self._graph.node[s].iterkeys() and self._graph.node[s]'\
+				'[u"{0}"] == u"""{1}""")'.format(k,v.replace('"',"'"))
 				for k,v in source_attr.iteritems()))
 		target_attr = u' and '.join(
-			(u'(u"{0}" in self._graph.node[t].iterkeys() and self._graph.node[t][u"{0}"] == u"""{1}""")'.format(k,v.replace('"',"'")) # replace to avoid syntax errors if ''' can be found in concepts   
+			(u'(u"{0}" in self._graph.node[t].iterkeys() and self._graph.node[t]'\
+				'[u"{0}"] == u"""{1}""")'.format(k,v.replace('"',"'"))  
 				for k,v in target_attr.iteritems()))
 		edge_attr = u' and '.join(
-			(u'(u"{0}" in attr.iterkeys() and attr[u"{0}"] == u"""{1}""")'.format(k,v.replace('"',"'")) # replace to avoid syntax errors if ''' can be found in concepts   
+			(u'(u"{0}" in attr.iterkeys() and attr[u"{0}"] == u"""{1}""")'.format(
+				k,v.replace('"',"'"))
 				for k,v in edge_attr.iteritems()))
-		edge_attr_eqllrgrthn = u' and '.join(
-			(u'(u"{0}" in attr.iterkeys() and attr[u"{0}"] >= {1})'.format(k,v.replace('"',"'")) # replace to avoid syntax errors if ''' can be found in concepts   
-				for k,v in edge_attr_eqllrgrthn.iteritems()))
+		edge_attr_ge = u' and '.join(
+			(u'(u"{0}" in attr.iterkeys() and attr[u"{0}"] >= {1})'.format(
+				k,v.replace('"',"'"))
+				for k,v in edge_attr_ge.iteritems()))
 		# print source_attr
 		command = u'''edges = [
 				{}
@@ -375,28 +400,32 @@ class Discourse(object):
 				u'if {}'.format(source_attr) if source_attr else u'',
 				u'if {}'.format(target_attr) if target_attr else u'',
 				u'if {}'.format(edge_attr) if edge_attr else u'',
-				u'if {}'.format(edge_attr_eqllrgrthn) if edge_attr_eqllrgrthn else u'',
+				u'if {}'.format(edge_attr_ge) if edge_attr_ge else u'',
 				)
 		# print command
 		exec(command)
 		return edges
 
-	def _edges_via(self, source_attr={}, connector_attr={}, target_attr={}, edge1_attr={}, edge2_attr={}, connector=True):
+	def _edges_via(self, source_attr={}, connector_attr={}, target_attr={}, 
+		edge1_attr={}, edge2_attr={}, connector=True):
 		out_type = u'(s1, t2, {u"connector":t1})' if connector else u'(s1, t2)'
 		source_attr = u' and '.join(
-			(u"(u'{0}' in self._graph.node[s1].iterkeys() and self._graph.node[s1][u'{0}'] == u'{1}')".format(k,v) 
+			(u'(u"{0}" in self._graph.node[s1].iterkeys() and self._graph.node[s1]'\
+				'[u"{0}"] == u"{1}")'.format(k,v) 
 				for k,v in source_attr.iteritems()))
 		connector_attr = u' and '.join(
-			(u"(u'{0}' in self._graph.node[t1].iterkeys() and self._graph.node[t1][u'{0}'] == u'{1}')".format(k,v) 
+			(u'(u"{0}" in self._graph.node[t1].iterkeys() and self._graph.node[t1]'\
+				'[u"{0}"] == u"{1}")'.format(k,v) 
 				for k,v in connector_attr.iteritems()))
 		target_attr = u' and '.join(
-			(u"(u'{0}' in self._graph.node[t2].iterkeys() and self._graph.node[t2][u'{0}'] == u'{1}')".format(k,v) 
+			(u'(u"{0}" in self._graph.node[t2].iterkeys() and self._graph.node[t2]'\
+				'[u"{0}"] == u"{1}")'.format(k,v) 
 				for k,v in target_attr.iteritems()))
 		edge1_attr = u' and '.join(
-			(u"(u'{0}' in attr1.iterkeys() and attr1[u'{0}'] == u'{1}')".format(k,v) 
+			(u'(u"{0}" in attr1.iterkeys() and attr1[u"{0}"] == u"{1}")'.format(k,v) 
 				for k,v in edge1_attr.iteritems()))
 		edge2_attr = u' and '.join(
-			(u"(u'{0}' in attr2.iterkeys() and attr2[u'{0}'] == u'{1}')".format(k,v) 
+			(u'(u"{0}" in attr2.iterkeys() and attr2[u"{0}"] == u"{1}")'.format(k,v) 
 				for k,v in edge2_attr.iteritems()))
 		# print source_attr
 		command = u'''edges = [
@@ -430,16 +459,19 @@ class Discourse(object):
 		elif attr[u'kind'] == u'citation':
 			source_attr = {u'kind':u'utterance'}
 			target_attr = {u'kind':u'utterance'}
-		result = list(self._edges(source_attr=source_attr, target_attr=target_attr, edge_attr=attr))
+		result = list(self._edges(
+			source_attr=source_attr, target_attr=target_attr, edge_attr=attr))
 		return False if result else True
 
 
 	# utterances_utterances level methods
-	def citations(self, source_attr={}, target_attr={}, edge_attr={}, data=True, keys=True):
+	def citations(self, source_attr={}, target_attr={}, edge_attr={}, 
+		data=True, keys=True):
 		source_attr[u'kind'] = u'utterance'
 		target_attr[u'kind'] = u'utterance'
 		edge_attr[u'relation'] = u'citation'
-		return self._edges(source_attr=source_attr, target_attr=target_attr, edge_attr=edge_attr, data=data, keys=keys)
+		return self._edges(source_attr=source_attr, target_attr=target_attr, 
+			edge_attr=edge_attr, data=data, keys=keys)
 
 	def add_citation(self, citing, cited, **attr):
 		attr[u'citing'] = citing
@@ -448,9 +480,11 @@ class Discourse(object):
 		attr = clean_attr(attr)
 		attr[u'kind'] = u'citation'
 		if attr[u'citing'] not in self._graph:
-			raise ValueError(u"Citing utterance {} doesn't exist".format(repr(attr[u'citing'])))
+			raise ValueError(u"Citing utterance {} doesn't exist".format(
+				repr(attr[u'citing'])))
 		if attr[u'cited'] not in self._graph:
-			raise ValueError(u"Cited utterance {} doesn't exist".format(repr(attr[u'cited'])))
+			raise ValueError(u"Cited utterance {} doesn't exist".format(
+				repr(attr[u'cited'])))
 		if not self._edge_is_unique(attr):
 			warnings.warn(u'Citation edge already exists.')
 			return
@@ -458,10 +492,12 @@ class Discourse(object):
 
 	# utterances_actors level methods
 
-	def utterances_actors(self, source_attr={}, target_attr={}, edge_attr={}, data=True, keys=True):
+	def utterances_actors(self, source_attr={}, target_attr={}, 
+		edge_attr={}, data=True, keys=True):
 		source_attr[u'kind'] = u'utterance'
 		target_attr[u'kind'] = u'actor'
-		return self._edges(source_attr=source_attr, target_attr=target_attr, edge_attr=edge_attr, data=data, keys=keys)
+		return self._edges(source_attr=source_attr, target_attr=target_attr, 
+			edge_attr=edge_attr, data=data, keys=keys)
 
 	def add_utterance_actor(self, utterance, actor, relation, ignore=False, **attr):
 		attr[u'utterance'] = utterance
@@ -470,15 +506,18 @@ class Discourse(object):
 		attr = clean_attr(attr)
 		attr[u'kind'] = u'utterance_actor'
 		if attr[u'utterance'] not in self._graph:
-			raise ValueError(u"Utterance {} doesn't exist".format(repr(attr[u'utterance'])))
+			raise ValueError(u"Utterance {} doesn't exist".format(
+				repr(attr[u'utterance'])))
 		if attr[u'actor'] not in self._graph:
-			raise ValueError(u"Actor {} doesn't exist".format(repr(attr[u'actor'])))
+			raise ValueError(u"Actor {} doesn't exist".format(
+				repr(attr[u'actor'])))
 		if not self._edge_is_unique(attr):
 			if ignore:
 				warnings.warn(u'Utterance-actor edge already exists.')
 				return
 			else:
-				raise KeyError(u"Utterance-actor edge already exists. Did you mean update?")
+				raise KeyError(
+					u"Utterance-actor edge already exists. Did you mean update?")
 		self._graph.add_edge(attr[u'utterance'], attr[u'actor'], **attr)
 
 
@@ -501,14 +540,15 @@ class Discourse(object):
 		return times_cited if data else [c[0] for c in times_cited]
 		
 
-	def co_x2(self, focus=u'target', source_attr={}, target_attr={}, edge_attr={}, edge_attr_eqllrgrthn={}):
+	def co_x2(self, focus=u'target', source_attr={}, target_attr={}, 
+		edge_attr={}, edge_attr_ge={}):
 		''' for all direct edges in graph (reachable through _edge method)
 		'''
 		two_mode = self._edges(
 			source_attr=source_attr, 
 			target_attr=target_attr,
 			edge_attr=edge_attr,
-			edge_attr_eqllrgrthn=edge_attr_eqllrgrthn,
+			edge_attr_ge=edge_attr_ge,
 			data=False, 
 			keys=False
 			)
@@ -573,7 +613,7 @@ class Discourse(object):
 	### Zotero related methods
 	##########################################################################
 
-	def load_zotero_basic(self, ZC, zotero_refresh=False): # Hier muss man Zotero_collection_items eben schon selbst bauen
+	def load_zotero_basic(self, ZC, zotero_refresh=False):
 		print u'\nFetching basic data from Zotero collection: "{}"'. \
 			format(ZC.collectionID)
 		count_actors = set()
@@ -582,7 +622,9 @@ class Discourse(object):
 			ZC.refresh()
 		for item in ZC.utterances:
 			# use all zotero fields as u_attr in special zot_* namespace except date, title and type (global namespace). Don't use creators, since they alreay go to actors
-			u_attr = {u''.join([u'zot_',k]):v for k,v in item.iteritems() if v and not k in [u'date',u'title',u'itemType', u'creators']}
+			u_attr = {u''.join([u'zot_',k]):v 
+				for k,v in item.iteritems() 
+				if v and not k in [u'date',u'title',u'itemType', u'creators']}
 			u_attr[u'date'] = item[u'date'] or u'0000'
 			u_attr[u'title'] = item[u'title']
 			u_attr[u'u_type'] = item[u'itemType']
@@ -594,7 +636,7 @@ class Discourse(object):
 			for creator in item[u'creators']:
 				# dealing with position for creatorType (author/editor/)
 				this_creatorType = creator[u'creatorType']
-				if counter == 1: # matches only in the first iteration. Used to 1) initialize au_position assignment and 2) to assign u_label and insert utterance
+				if counter == 1: # matches only in the first iteration. Used to initialize au_position assignment 
 					last_creatorType = this_creatorType
 				if not last_creatorType == this_creatorType: # matches for each creator type (e.g. 'author' and 'editor')
 					counter = 1
@@ -693,14 +735,16 @@ class Discourse(object):
 		### process cit_notes
 		for item in ZC.cit_notes:
 			parent_zot_key = item[u'parentItem']
-			utterance = list(self.utterances(zot_key=parent_zot_key)) # Should be a list with format: {label: {attr}}
+			utterance = list(self.utterances(zot_key=parent_zot_key)) # list with format: {label: {attr}}
 			
 			if len(utterance) == 1: 
 				utterance = utterance[0][1] # utterance now a dict!
 			else: # if no parent item found...
 				print utterance
-				raise ValueError(u'No singular match for zot_key: "{}"'.format(parent_zot_key))
-			print u'\tProcessing citation list of "{}"'.format(utterance[u'label'])
+				raise ValueError(u'No singular match for zot_key: "{}"'.format(
+					parent_zot_key))
+			print u'\tProcessing citation list of "{}"'.format(
+				utterance[u'label'])
 
 			# set default grammars
 			c_grammar = DEFAULT_C_GRAMMAR
@@ -711,14 +755,14 @@ class Discourse(object):
 				format(A_GRAMMARS[a_grammar])
 
 			# clean citationlist
-			cit_note = unicodedata.normalize("NFKC", item['note']) # Alternativ zur vorherigen Zeile, aber nennt z.B. "&"" Zeichen um...(in "&amp;"" oder so)
+			cit_note = unicodedata.normalize("NFKC", item['note']) # nennt z.B. "&"" Zeichen um...(in "&amp;"" oder so)
 	 		cit_note = RE_P_TAGS.sub('', cit_note) # kill stuff (html tags and repeated blanks)
 	 		cit_note = RE_AMP.sub('&', cit_note) # make real "&" symbols
 	 		cit_note = RE_CIT_LINEBREAKS.sub('\n', cit_note) # make stuff to linebreaks
 	 		cit_note = RE_CLEAN_DOUBLELINEBREAK.sub('\n\n', cit_note)  # Kill arbitrary \n and blanks between item blocks
 	 		cit_note = RE_EMPTY_END_OF_STRING.sub('', cit_note) # Kill arbitrary \n and blanks at the end of the note
 	 		cit_note = RE_EMPTY_END_OF_LINE.sub('\n', cit_note) # Kill arbitrary blanks and tabs before a linebreak
-			cit_note = cit_note.split('\n\n') # hier wird alles in Blöcke zerhackt
+			cit_note = cit_note.split('\n\n') # split into blocks
 
 			# Process cit_note block by block
 			for block in cit_note:
@@ -747,49 +791,86 @@ class Discourse(object):
 						direct_match = False
 						for nid, attr in self._graph.nodes_iter(data=True):
 							if attr[u'kind'] == u'utterance':
-								if str_length_similarity(attr[u'title'], cit_title) >= title_sim:
-									if int(cit_year) + date_span[1] >= int(get_year(attr[u'date'])) >= int(cit_year) - date_span[0]:
-										if self._get_firstauthor(attr[u'label']).split(u',')[0].strip(u'*') == cit_firstauthor.split(u',')[0].strip(u'*'): # check this one...
+								if str_length_similarity(
+									attr[u'title'], cit_title) >= title_sim:
+									if int(cit_year) + date_span[1] \
+										>= int(get_year(attr[u'date'])) \
+										>= int(cit_year) - date_span[0]:
+										if self._get_firstauthor(
+											attr[u'label']).split(
+											u',')[0].strip(
+											u'*') == cit_firstauthor.split(
+											u',')[0].strip(u'*'):
 											if get_year(attr[u'date']) == cit_year:
 												# 1) same firstauthor, same year, same title
 												if attr[u'title'] == cit_title:
-													print u'\t...match 1, same firstauthor, same year, same title as "{}"'.\
+													print u'\t...match 1, same firstauthor, '\
+													'same year, same title as "{}"'.\
 														format(attr[u'label'])
-													self.add_citation(utterance[u'label'], attr[u'label'], match_type=u'1', citation=block)
+													self.add_citation(
+														utterance[u'label'], 
+														attr[u'label'], 
+														match_type=u'1', 
+														citation=block)
 													direct_match = True
 													break
 												# 2) fuzzy title, same firstauthor, same year
-												elif distance.nlevenshtein(cit_title, attr[u'title'], method=2) <= nlev:
+												elif distance.nlevenshtein(
+													cit_title, attr[u'title'], 
+													method=2) <= nlev:
 													match_2.append(attr)
 											else: 
 												# 3) fuzzy year, same firstauthor, same title
 												if attr[u'title'] == cit_title:
 													match_3.append(attr)
 												# 4) fuzzy year, fuzzy date, same firstauthor
-												elif distance.nlevenshtein(cit_title, attr[u'title'], method=2) <= nlev:
+												elif distance.nlevenshtein(
+													cit_title, attr[u'title'], 
+													method=2) <= nlev:
 													match_4.append(attr)
 						if not direct_match:
 							if match_2:
 								if len(match_2) == 1:
-									print u'\t...match 2, fuzzy title, same firstauthor, same year as "{}"'.\
+									print u'\t...match 2, fuzzy title, '\
+										'same firstauthor, same year as "{}"'.\
 										format(match_2[0][u'label'])
-									self.add_citation(utterance[u'label'], match_2[0][u'label'], match_type=u'2', citation=block)
+									self.add_citation(
+										utterance[u'label'], 
+										match_2[0][u'label'], 
+										match_type=u'2', 
+										citation=block)
 								else:
-									raise ValueError(u'More than one match for fuzzy title, firstauthor, year')
+									raise ValueError(
+										u'More than one match for fuzzy title, '\
+										'firstauthor, year')
 							elif match_3:
 								if len(match_3) == 1:
-									print u'\t...match 3, fuzzy year, same firstauthor, same title as "{}"'.\
+									print u'\t...match 3, fuzzy year, '\
+									'same firstauthor, same title as "{}"'.\
 										format(match_3[0][u'label'])
-									self.add_citation(utterance[u'label'], match_3[0][u'label'], match_type=u'3', citation=block)
+									self.add_citation(
+										utterance[u'label'], 
+									match_3[0][u'label'], 
+									match_type=u'3', 
+									citation=block)
 								else:
-									raise ValueError(u'More than one match for fuzzy year, same firstauthor, same title')
+									raise ValueError(
+										u'More than one match for fuzzy year, '\
+										'same firstauthor, same title')
 							elif match_4:
 								if len(match_4) == 1:
-									print u'\t...match 4, fuzzy year, fuzzy date, same firstauthor as "{}"'.\
+									print u'\t...match 4, fuzzy year, fuzzy date, '\
+									'same firstauthor as "{}"'.\
 										format(match_4[0][u'label'])
-									self.add_citation(utterance[u'label'], match_4[0][u'label'], match_type=u'4', citation=block)
+									self.add_citation(
+										utterance[u'label'], 
+									match_4[0][u'label'], 
+									match_type=u'4', 
+									citation=block)
 								else:
-									raise ValueError(u'More than one match for fuzzy year, fuzzy date, same firstauthor')
+									raise ValueError(
+										u'More than one match for fuzzy year, '\
+										'fuzzy date, same firstauthor')
 							else:
 								### add to _new_cits
 								creators = [{u'lastName': author[0],
@@ -801,20 +882,24 @@ class Discourse(object):
 								new_cit[u'date'] = cit_date
 								new_cit[u'creators'] = creators
 								new_cit[u'collections'] = [ZC.collectionID]
-								new_cit[u'tags'].append({u'tag': u'RDA new citation'})
+								new_cit[u'tags'].append(
+									{u'tag': u'RDA new citation'})
 								if not new_cit in self._new_cits:
 									self._new_cits.append(new_cit)
-									print u'\t...no match: "{}" --> saved as potential Zotero upload'.\
+									print u'\t...no match: "{}" '\
+									'--> saved as potential Zotero upload'.\
 										format(c_label)	
 								else:
-									print u'\t...no match: "{}" --> was already saved as potential Zotero upload'.\
+									print u'\t...no match: "{}" '\
+									'--> was already saved as potential Zotero upload'.\
 										format(c_label)
 					else:
 						print u'\t...citations must have 3-4 lines -> ignoring: "{}"'.\
 							format(cit)
 
 				elif u'A_GRAMMAR' in block:
-					a_grammar_match = re.match(r'^A_GRAMMAR=(?P<new_a_grammar>.*)$', block)
+					a_grammar_match = re.match(
+						r'^A_GRAMMAR=(?P<new_a_grammar>.*)$', block)
 					if a_grammar_match:
 						new_a_grammar = re.sub(r', *', r',', a_grammar_match.\
 							group('new_a_grammar'))
@@ -842,13 +927,8 @@ class Discourse(object):
 					print u'\t...cannot interpret this line: "{}"'.format(block)
 	
 
-	def load_zotero_cleantexts(self, ZC, zotero_refresh=False, read_method=u'textacy', **kwargs):
-		""" read and clean cleantext and return textacy corpus
-
-		---> MODIFY: 
-			1) No other attr in metadata than label!
-			2) copy filepaths (raw and clean) to utterance as attr!
-		"""
+	def load_zotero_cleantexts(self, ZC, zotero_refresh=False, 
+		read_method=u'textacy', **kwargs):
 		print u'\nLoading Zotero cleantexts into corpus'
 		kwargs = dict(kwargs)
 		if not isinstance(self._corpus, Corpus):
@@ -868,7 +948,8 @@ class Discourse(object):
 				# keys = [k for k in parent_attr.iterkeys()]
 				# values = [v for v in parent_attr.itervalues()]
 				# metadata = dict(zip(keys, values))
-				parent_label = [u for u in self.utterances(zot_key=item[u'parentItem'])][0][1][u'label']
+				parent_label = [u for u in self.utterances(
+					zot_key=item[u'parentItem'])][0][1][u'label']
 				self._graph[parent_label][u'cleantext_path'] = item[u'path'] # Add cleantext path to utterance attr
 				metadata = {u'label':parent_label}
 				metadata.update({u'from_format': item[u'path'].rsplit('.')[1],
@@ -880,7 +961,6 @@ class Discourse(object):
 
 	### Text analytical methods
 	##########################################################################
-	# self._corpus = Corpus()
 
 	def edit_cleantext(self, label):
 		file = self._graph[label][u'cleantext_path']
@@ -891,7 +971,8 @@ class Discourse(object):
 		print u'\nMaking new corpus'
 		if not isinstance(self._corpus, Corpus) or reset:
 			self._corpus = Corpus()
-			print u'\t...done' if not reset else u'\t...corpus reset. All existing data deleted.'
+			print u'\t...done' if not reset \
+				else u'\t...corpus reset. All existing data deleted.'
 		else:
 			print u'\t...corpus already exists, use "reset" to replace'
 
@@ -916,16 +997,22 @@ class Discourse(object):
 			u'exclude_pos':exclude_pos, # Note that min_freq is used here not within textacy.extract.words() but for co-words! 
 		}
 		G = nx.DiGraph() if directed else nx.Graph()
-		label_tokens_pairs = ((doc.metadata[u'label'], textacy.extract.words(doc, **kwargs)) for doc in self._corpus)
+		label_tokens_pairs = ((
+			doc.metadata[u'label'], textacy.extract.words(doc, **kwargs)) 
+			for doc in self._corpus)
 		for ltp in label_tokens_pairs:
 			for win in sliding_window(ltp[1], width):
-				win = [t.lemma_ for t in win] if lemma else [t.lower_ for t in win]
+				win = [t.lemma_ for t in win] \
+					if lemma else [t.lower_ for t in win]
 				for i in range(1,width):
 					if not G.has_edge(win[0], win[i]):
-						G.add_edge(win[0], win[i], freq = float(1) / float(i), connectors = {ltp[0]:1})
+						G.add_edge(win[0], win[i], 
+							freq = float(1) / float(i), 
+							connectors = {ltp[0]:1})
 				
 					elif per_doc :
-						if not ltp[0] in G.edge[win[0]][win[i]][u'connectors'].iterkeys():
+						if not ltp[0] in G.edge[win[0]][win[i]]\
+							[u'connectors'].iterkeys():
 							G.edge[win[0]][win[i]][u'freq'] += float(1) / float(i)
 							G.edge[win[0]][win[i]][u'connectors'][ltp[0]] = 1
 					elif not per_doc:
@@ -934,7 +1021,8 @@ class Discourse(object):
 							G.edge[win[0]][win[i]][u'connectors'][ltp[0]] = 1
 						else:
 							G.edge[win[0]][win[i]][u'connectors'][ltp[0]] += float(1) / float(i)
-		return (e if connectors else e[:2]+({u'freq':e[2][u'freq']},) for e in G.edges(data=True) if e[2][u'freq']>=min_freq)
+		return (e if connectors else e[:2]+({u'freq':e[2][u'freq']},) 
+			for e in G.edges(data=True) if e[2][u'freq']>=min_freq)
 
 	def topics(self, selection=None, method=u'nmf', n_topics=20, 
 		weighting=u'tfidf', normalize=True, smooth_idf=True, 
@@ -954,4 +1042,25 @@ class Discourse(object):
 		vectorizer = textacy.vsm.Vectorizer(weighting=weighting, normalize=normalize, 
 			smooth_idf=smooth_idf, min_df=min_df, max_df=max_df, max_n_terms=max_n_terms)
 		return TM(terms_list, vectorizer, method=method, n_topics=n_topics)
+
+	def words_in_context(self, words, ignore_case=True, window_width=50, print_only=True):
+		# https://radimrehurek.com/gensim/models/word2vec.html
+		# http://textminingonline.com/getting-started-with-word2vec-and-glove-in-python
+		# https://rare-technologies.com/word2vec-tutorial/
+		print u'\nWord(s) in context for: "{}"'.format(words)
+		result = ((doc.metadata[u'label'], textacy.text_utils.keyword_in_context(doc.text, words, 
+			ignore_case=ignore_case, window_width=window_width, print_only=False)) 
+			for doc in self._corpus)
+		if print_only:
+			for label_context in result:
+				print u'\n{0}\n{1}\n{0}'.format(79*u'#',label_context[0])
+				for line in label_context[1]:
+					print line
+
+	def word2vec(self, size=100, window=5, min_count=5, workers=4):
+		print u'\nTraining word2vec model'
+		sents = doc.sents for doc in self._corpus
+		model = Word2Vec(sents, size=size, window=window, min_count=min_count, workers=workers)
+		return model
+
 	

@@ -44,11 +44,6 @@ sys.setdefaultencoding(u'utf-8')
 
 
 def sliding_window(seq, n=2):
-	''' list of sliding windows of len n in seq
-		source: 
-		https://stackoverflow.com/questions/8408117/generate-a-list-of-strings-with-a-sliding-window-using-itertools-yield-and-ite
-	'''
-	# return (seq[i:i+n] for i in xrange(len(seq)-(n-1))) # geht nicht mit generators wegen len()!!!
 	return zip(*(collections.deque(itertools.islice(it, i), 0) or it
         for i, it in enumerate(itertools.tee(seq, n))))
 
@@ -136,25 +131,25 @@ def str_length_similarity(s1, s2):
 		return float(shorter)/float(longer)
 
 
-def levenshtein(s1, s2):
-	"""
-	returns the Levenshtein distance for two given string 
-	(source: https://en.wikibooks.org/wiki/Algorithm_Implementation/Strings/Levenshtein_distance#Python)
-	"""
-	if len(s1) < len(s2):
-		return levenshtein(s2, s1)
-	if len(s2) == 0:
-		return len(s1)
-	previous_row = range(len(s2) + 1)
-	for i, c1 in enumerate(s1):
-		current_row = [i + 1]
-		for j, c2 in enumerate(s2):
-			insertions = previous_row[j + 1] + 1 # j+1 instead of j since previous_row and current_row are one character longer
-			deletions = current_row[j] + 1       # than s2
-			substitutions = previous_row[j] + (c1 != c2)
-			current_row.append(min(insertions, deletions, substitutions))
-		previous_row = current_row
-	return previous_row[-1]
+# def levenshtein(s1, s2):
+# 	"""
+# 	returns the Levenshtein distance for two given string 
+# 	(source: https://en.wikibooks.org/wiki/Algorithm_Implementation/Strings/Levenshtein_distance#Python)
+# 	"""
+# 	if len(s1) < len(s2):
+# 		return levenshtein(s2, s1)
+# 	if len(s2) == 0:
+# 		return len(s1)
+# 	previous_row = range(len(s2) + 1)
+# 	for i, c1 in enumerate(s1):
+# 		current_row = [i + 1]
+# 		for j, c2 in enumerate(s2):
+# 			insertions = previous_row[j + 1] + 1 # j+1 instead of j since previous_row and current_row are one character longer
+# 			deletions = current_row[j] + 1       # than s2
+# 			substitutions = previous_row[j] + (c1 != c2)
+# 			current_row.append(min(insertions, deletions, substitutions))
+# 		previous_row = current_row
+# 	return previous_row[-1]
 
 def adjacency(links, focus):
 	""" 
@@ -186,7 +181,8 @@ def adjacency(links, focus):
 			# (unicode(link[0]), unicode(link[1]), 
 			(link[0], link[1], 
 				{u'weight':unicode(unique_links_weight[str(link)]), 
-				u'conncectors':{i:c for i,c in enumerate(unique_links_connector[str(link)])}
+				u'conncectors':{i:c for i,c in enumerate(
+				unique_links_connector[str(link)])}
 				}
 			))
 	return outlist
@@ -204,15 +200,17 @@ def clean_text(text, run_test=False, special=False,
 				no_accents=False, no_contractions=False, no_urls=False, 
 				no_emails=False, no_phone_numbers=False, no_citations=False, 
 				no_doi=False, no_date=False, no_currency_symbols=False, 
-				no_numbers=False, no_punct=False, lowercase=False, no_lonelychars=False):
-	""" Cleans text building on textacy preprocess functionality
+				no_numbers=False, no_punct=False, lowercase=False, 
+				no_lonelychars=False):
+	""" Cleans text, building on textacy preprocess functionality
 	"""
 	if run_test:
-		print u'\n\n RAW:\n{}\n{}\n\n{}\n'.format(r'>'*25, repr(text[:1000]), repr(text[-1000:]))
+		print u'\n\n RAW:\n{}\n{}\n\n{}\n'.format(
+			u'>'*25, repr(text[:1000]), repr(text[-1000:]))
 	# Basic stuff
 	if special:
 		text = re.sub(r'\xc2\xa0', u'', text)
-		text = re.sub(r'\t|\r', u'', text)
+		text = re.sub(u'\t|\u', u'', text)
 	if fix_unicode is True:
 		text = ftfy.fix_text(text, normalization=u'NFC')
 		""" 'NFC' combines characters and diacritics written using separate code points,
@@ -224,75 +222,91 @@ def clean_text(text, run_test=False, special=False,
         (source: http://textacy.readthedocs.io/en/latest/_modules/textacy/preprocess.html#fix_bad_unicode)
 		"""
 		if run_test:
-			print u'\n\n CLEAN --> {}:\n{}\n{}\n\n{}\n'.format(r'fix_unicode', r'>'*25, repr(text[:1000]), repr(text[-1000:]))
+			print u'\n\n CLEAN --> {}:\n{}\n{}\n\n{}\n'.format(
+				u'fix_unicode', u'>'*25, repr(text[:1000]), repr(text[-1000:]))
 	if no_linebreaks is True:
 		text=RE_LINEBREAKS.sub(' ',text)
 		if run_test:
-			print u'\n\n CLEAN --> {}:\n{}\n{}\n\n{}\n'.format(r'no_linebreaks', r'>'*25, repr(text[:1000]), repr(text[-1000:]))
+			print u'\n\n CLEAN --> {}:\n{}\n{}\n\n{}\n'.format(
+				u'no_linebreaks', u'>'*25, repr(text[:1000]), repr(text[-1000:]))
 	if transliterate is True:
 		text = textacy.preprocess.transliterate_unicode(text)
 		if run_test:
-			print u'\n\n CLEAN --> {}:\n{}\n{}\n\n{}\n'.format(r'transliterate', r'>'*25, repr(text[:1000]), repr(text[-1000:]))
+			print u'\n\n CLEAN --> {}:\n{}\n{}\n\n{}\n'.format(
+				u'transliterate', u'>'*25, repr(text[:1000]), repr(text[-1000:]))
 	if no_accents is True: # Redundant if transliterate: http://textacy.readthedocs.io/en/latest/api_reference.html#module-textacy.preprocess
 		text = textacy.preprocess.remove_accents(text, method='unicode')
 		if run_test:
-			print u'\n\n CLEAN --> {}:\n{}\n{}\n\n{}\n'.format(r'no_accents', r'>'*25, repr(text[:1000]), repr(text[-1000:]))
+			print u'\n\n CLEAN --> {}:\n{}\n{}\n\n{}\n'.format(
+				u'no_accents', u'>'*25, repr(text[:1000]), repr(text[-1000:]))
 	if no_contractions is True:
 		text = textacy.preprocess.unpack_contractions(text)
 		if run_test:
-			print u'\n\n CLEAN --> {}:\n{}\n{}\n\n{}\n'.format(r'no_contractions', r'>'*25, repr(text[:1000]), repr(text[-1000:]))
+			print u'\n\n CLEAN --> {}:\n{}\n{}\n\n{}\n'.format(
+				u'no_contractions', u'>'*25, repr(text[:1000]), repr(text[-1000:]))
 	# Replace urls, emails, citations, etc.
 	if no_doi:
 		text=RE_DOI.sub('*DOI*', text)
 		if run_test:
-			print u'\n\n CLEAN --> {}:\n{}\n{}\n\n{}\n'.format(r'no_doi', r'>'*25, repr(text[:1000]), repr(text[-1000:]))
+			print u'\n\n CLEAN --> {}:\n{}\n{}\n\n{}\n'.format(
+				u'no_doi', u'>'*25, repr(text[:1000]), repr(text[-1000:]))
 	if no_urls is True:
 		text = textacy.preprocess.replace_urls(text)
 		if run_test:
-			print u'\n\n CLEAN --> {}:\n{}\n{}\n\n{}\n'.format(r'no_urls', r'>'*25, repr(text[:1000]), repr(text[-1000:]))
+			print u'\n\n CLEAN --> {}:\n{}\n{}\n\n{}\n'.format(
+				u'no_urls', u'>'*25, repr(text[:1000]), repr(text[-1000:]))
 	if no_emails is True:
 		text = textacy.preprocess.replace_emails(text)
 		if run_test:
-			print u'\n\n CLEAN --> {}:\n{}\n{}\n\n{}\n'.format(r'no_emails', r'>'*25, repr(text[:1000]), repr(text[-1000:]))
+			print u'\n\n CLEAN --> {}:\n{}\n{}\n\n{}\n'.format(
+				u'no_emails', u'>'*25, repr(text[:1000]), repr(text[-1000:]))
 	if no_phone_numbers is True:
 		text = textacy.preprocess.replace_phone_numbers(text)
 		if run_test:
-			print u'\n\n CLEAN --> {}:\n{}\n{}\n\n{}\n'.format(r'no_phone_numbers', r'>'*25, repr(text[:1000]), repr(text[-1000:]))
+			print u'\n\n CLEAN --> {}:\n{}\n{}\n\n{}\n'.format(
+				u'no_phone_numbers', u'>'*25, repr(text[:1000]), repr(text[-1000:]))
 	# if no_doi:
 	# 	text=RE_DOI.sub('*DOI*', text)
 	# 	if run_test:
-	# 		print u'\n\n CLEAN --> {}:\n{}\n{}\n\n{}\n'.format(r'no_doi', r'>'*25, repr(text[:1000]), repr(text[-1000:]))
+	# 		print u'\n\n CLEAN --> {}:\n{}\n{}\n\n{}\n'.format(u'no_doi', u'>'*25, repr(text[:1000]), repr(text[-1000:]))
 	if no_citations is True:
 		text=RE_INTEXT_CITATION_CANDIDATE.sub('*CITATION*',text)
 		if run_test:
-			print u'\n\n CLEAN --> {}:\n{}\n{}\n\n{}\n'.format(r'no_citations', r'>'*25, repr(text[:1000]), repr(text[-1000:]))
+			print u'\n\n CLEAN --> {}:\n{}\n{}\n\n{}\n'.format(
+				u'no_citations', u'>'*25, repr(text[:1000]), repr(text[-1000:]))
 	if no_date is True:
 		text=RE_DATE_ALL.sub('*DATE*', text)
 		if run_test:
-			print u'\n\n CLEAN --> {}:\n{}\n{}\n\n{}\n'.format(r'no_date', r'>'*25, repr(text[:1000]), repr(text[-1000:]))
+			print u'\n\n CLEAN --> {}:\n{}\n{}\n\n{}\n'.format(
+				u'no_date', u'>'*25, repr(text[:1000]), repr(text[-1000:]))
 	if no_currency_symbols is True:
 		text = textacy.preprocess.replace_currency_symbols(text)
 		if run_test:
-			print u'\n\n CLEAN --> {}:\n{}\n{}\n\n{}\n'.format(r'no_currency_symbols', r'>'*25, repr(text[:1000]), repr(text[-1000:]))
+			print u'\n\n CLEAN --> {}:\n{}\n{}\n\n{}\n'.format(
+				u'no_currency_symbols', u'>'*25, repr(text[:1000]), repr(text[-1000:]))
 
 	# More fundamental stuff, but must come at the end, so not to corrupt above cleaning methods
 	if no_numbers is True:
 		text = textacy.preprocess.replace_numbers(text)
 		if run_test:
-			print u'\n\n CLEAN --> {}:\n{}\n{}\n\n{}\n'.format(r'no_numbers', r'>'*25, repr(text[:1000]), repr(text[-1000:]))
+			print u'\n\n CLEAN --> {}:\n{}\n{}\n\n{}\n'.format(
+				u'no_numbers', u'>'*25, repr(text[:1000]), repr(text[-1000:]))
 	if no_punct is True:
 		text = textacy.preprocess.remove_punct(text)
 		if run_test:
-			print u'\n\n CLEAN --> {}:\n{}\n{}\n\n{}\n'.format(r'no_punct', r'>'*25, repr(text[:1000]), repr(text[-1000:]))
+			print u'\n\n CLEAN --> {}:\n{}\n{}\n\n{}\n'.format(
+				u'no_punct', u'>'*25, repr(text[:1000]), repr(text[-1000:]))
 	if lowercase is True:
 		text = text.lower()
 		if run_test:
-			print u'\n\n CLEAN --> {}:\n{}\n{}\n\n{}\n'.format(r'lowercase', r'>'*25, repr(text[:1000]), repr(text[-1000:]))
+			print u'\n\n CLEAN --> {}:\n{}\n{}\n\n{}\n'.format(
+				u'lowercase', u'>'*25, repr(text[:1000]), repr(text[-1000:]))
 	if no_lonelychars:
 		text=RE_LONELY_CHAR.sub('', text)
-	text=re.sub(r'\*', r'', text)
+	text=re.sub(u'\*', u'', text)
 	text = textacy.preprocess.normalize_whitespace(text)
 	if run_test:
-		print u'\n\n CLEAN --> {}:\n{}\n{}\n\n{}\n{}\n'.format(r'whitespace', r'>'*25, repr(text[:1000]), repr(text[-1000:]), r'-'*100)
+		print u'\n\n CLEAN --> {}:\n{}\n{}\n\n{}\n{}\n'.format(
+			u'whitespace', u'>'*25, repr(text[:1000]), repr(text[-1000:]), u'-'*100)
 	return text
 

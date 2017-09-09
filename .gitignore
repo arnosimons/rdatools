@@ -1,3 +1,6 @@
+to_do.txt
+
+
 *.pyc
 *.DS_Store
 *.sublime-project
@@ -9,3 +12,4 @@
 /build
 /dist
 /rdatools.egg-info
+/release_and_install

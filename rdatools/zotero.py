@@ -102,9 +102,8 @@ class Zotero_collection(object):
 
 	def prepare_cleantext(self, path=u'', replace=False, read_method=u'textacy',
 							fix_unicode=True, transliterate=True, **kwargs):
- 		""" Reads any textfile tagged in Zotero as 'RDA rawtext'. Then: 
- 			1) creates clean txt.file (to be further hand cleaned), 
- 			2) updates 'u_cleantextpath' accordingly
+ 		""" Reads any textfile tagged in Zotero as 'RDA rawtext' and reates 
+ 		clean txt.file (to be further hand cleaned), 
  		"""
 		kwargs = dict(kwargs)
 		kwargs[u'transliterate'] = transliterate
@@ -126,7 +125,8 @@ class Zotero_collection(object):
 						for u in self.utterances 
 						if u[u'key'] == r[u'parentItem']][0]),
 				u'rawpath': r[u'path'],
-				u'existing_clean': [c[u'key'] for c in self.cleantexts if c[u'parentItem'] == r[u'parentItem']],
+				u'existing_clean': [c[u'key'] for c in self.cleantexts \
+					if c[u'parentItem'] == r[u'parentItem']],
 				u'parent': r[u'parentItem'],
 				u'tags': [{u'tag':u'RDA cleantext'}]} 
 				for r in self.rawtexts
@@ -142,8 +142,8 @@ class Zotero_collection(object):
 				u'parent': r[u'parentItem'],
 				u'tags': [{u'tag': u'RDA cleantext'}]} 
 				for r in self.rawtexts 
-				if not r[u'parentItem'] in [c[u'parentItem'] for c in self.cleantexts]
-				]
+				if not r[u'parentItem'] in [c[u'parentItem'] 
+					for c in self.cleantexts]]
 		else:
 			raise ValueError(u'keyword argument "replace" must be True or False!')
 		if new_attachments:
@@ -171,7 +171,8 @@ class Zotero_collection(object):
 					self.conn.create_items([upload],a['parent'])
 				else:
 					
-					print u'\t...updating path in existing Zotero attachment: "{}"'.format(file_path)
+					print u'\t...updating path in existing Zotero '\
+						'attachment: "{}"'.format(file_path)
 					existing = self.conn.item(a['existing_clean'][0])
 					existing[u'data'][u'title'] = upload[u'title']
 					existing[u'data'][u'path'] = upload[u'path']
