@@ -3,8 +3,17 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to rdatools's documentation!
+API Reference
 ====================================
+
+Doc and Corpus
+--------------
+
+.. automodule:: rdatools.discourse
+    :members:
+
+
+
 
 Contents:
 
