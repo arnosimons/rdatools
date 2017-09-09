@@ -6,7 +6,7 @@
 API Reference
 ====================================
 
-Doc and Corpus
+Discourse
 --------------
 
 .. automodule:: rdatools.discourse

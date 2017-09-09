@@ -42,6 +42,17 @@ from rdatools.tm import TM
 
 class Discourse(object):
 
+	"""
+	A ``Discourse`` contains and manages actors and utterances and all the 
+	relations between them. 
+
+	Initialize an empty ``Discourse``::
+
+		>>> D = rdatools.Discourse()
+        >>> print(D)
+        Discourse(0 utterances, 0 actors)
+	"""
+
 	def __init__(self):
 		print u'\nYou created a new Discourse ;-)'
 		self._graph = nx.MultiDiGraph()
