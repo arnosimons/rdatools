@@ -12,7 +12,11 @@ Discourse
 .. automodule:: rdatools.discourse
     :members:
 
+TM
+--------------
 
+.. automodule:: rdatools.tm
+    :members:
 
 
 Contents:

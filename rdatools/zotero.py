@@ -31,7 +31,7 @@ from pyzotero import zotero
 from rdatools.functions import *
 
 
-class Zotero_collection(object):
+class ZoteroCollection(object):
 	def __init__(self, library_id, library_type, api_key, collectionID):
 		### connection
 		self.conn = zotero.Zotero(library_id, library_type, api_key)

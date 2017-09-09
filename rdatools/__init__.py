@@ -49,7 +49,7 @@ __version__ = get_distribution('rdatools').version
 
 
 from .discourse import Discourse
-from .zotero import Zotero_collection
+from .zotero import ZoteroCollection
 from .corpus import Corpus
 from .functions import adjacency
-from .tm import TM
+from .tm import TopicModel

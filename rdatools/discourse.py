@@ -38,7 +38,7 @@ import unicodedata
 from rdatools.constants import *
 from rdatools.functions import *
 from rdatools.corpus import Corpus
-from rdatools.tm import TM
+from rdatools.tm import TopicModel
 
 class Discourse(object):
 
@@ -49,8 +49,9 @@ class Discourse(object):
 	Initialize an empty ``Discourse``::
 
 		>>> D = rdatools.Discourse()
-        >>> print(D)
-        Discourse(0 utterances, 0 actors)
+		>>> print(D)
+		Discourse(0 utterances, 0 actors)
+
 	"""
 
 	def __init__(self):
@@ -677,7 +678,7 @@ class Discourse(object):
 		"""
 		if not ZC.cit_notes:
 			raise ValueError(u'No cit_notes found. Check your Zotero tags and '\
-				u'consider refreshing Zotero_collection')
+				u'consider refreshing your ZoteroCollection object')
 		print u'\nFetching citations from Zotero collection: "{}"'.\
 			format(ZC.collectionID)
 		if zotero_refresh:
@@ -1052,7 +1053,7 @@ class Discourse(object):
 		# understanding min_df/max_df -> https://stackoverflow.com/questions/27697766/understanding-min-df-and-max-df-in-scikit-countvectorizer
 		vectorizer = textacy.vsm.Vectorizer(weighting=weighting, normalize=normalize, 
 			smooth_idf=smooth_idf, min_df=min_df, max_df=max_df, max_n_terms=max_n_terms)
-		return TM(terms_list, vectorizer, method=method, n_topics=n_topics)
+		return TopicModel(terms_list, vectorizer, method=method, n_topics=n_topics)
 
 	def words_in_context(self, words, ignore_case=True, window_width=50, print_only=True):
 		# https://radimrehurek.com/gensim/models/word2vec.html

@@ -27,7 +27,7 @@ along with RDAtools.  If not, see <http://www.gnu.org/licenses/>.
 
 import textacy
 
-class TM(object):
+class TopicModel(object):
 	'''
 	This class only implements textacy's original TM handling.
 	'''
