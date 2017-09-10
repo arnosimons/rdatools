@@ -14,7 +14,7 @@ import os.path
 
 
 
-VERSION = '0.1.3'
+VERSION = '0.1.4'
 
 __dir__ = os.path.abspath(os.path.dirname(__file__))
 
