@@ -4,7 +4,7 @@ API Reference
 Discourse
 --------------
 
-.. automodule:: rdatools.discourse
+.. automodule:: discourse
 	:members:
 
 
