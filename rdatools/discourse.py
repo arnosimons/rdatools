@@ -1071,7 +1071,7 @@ class Discourse(object):
 
 	def word2vec(self, size=100, window=5, min_count=5, workers=4):
 		print u'\nTraining word2vec model'
-		sents = doc.sents for doc in self._corpus
+		sents = (doc.sents for doc in self._corpus)
 		model = Word2Vec(sents, size=size, window=window, min_count=min_count, workers=workers)
 		return model
 

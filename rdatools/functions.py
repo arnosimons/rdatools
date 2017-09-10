@@ -210,7 +210,7 @@ def clean_text(text, run_test=False, special=False,
 	# Basic stuff
 	if special:
 		text = re.sub(r'\xc2\xa0', u'', text)
-		text = re.sub(u'\t|\u', u'', text)
+		text = re.sub(r'\t|\u', u'', text)
 	if fix_unicode is True:
 		text = ftfy.fix_text(text, normalization=u'NFC')
 		""" 'NFC' combines characters and diacritics written using separate code points,
