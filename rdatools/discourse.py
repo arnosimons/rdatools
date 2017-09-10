@@ -55,7 +55,7 @@ class Discourse(object):
 	"""
 
 	def __init__(self):
-		print u'\nYou created a new Discourse ;-)'
+		# print u'\nYou created a new Discourse ;-)'
 		self._graph = nx.MultiDiGraph()
 		self._corpus = None
 		self._new_cits = []
@@ -1069,10 +1069,16 @@ class Discourse(object):
 				for line in label_context[1]:
 					print line
 
-	def word2vec(self, size=100, window=5, min_count=5, workers=4):
-		print u'\nTraining word2vec model'
-		sents = (doc.sents for doc in self._corpus)
-		model = Word2Vec(sents, size=size, window=window, min_count=min_count, workers=workers)
-		return model
+	# def word2vec(self, size=100, window=5, min_count=5, workers=4):
+	# 	print u'\nTraining word2vec model'
+	# 	# input must be list of sents, whereby sents must be list of words!
+	# 	sents = [list(doc.sents) for doc in self._corpus]
+	# 	for s in sents[:3]:
+	# 		print s
+	# 	model = gensim.models.Word2Vec(sents, size=size, window=window, min_count=min_count, workers=workers)
+	# 	# model = gensim.models.Word2Vec(iter=1)  # an empty model, no training yet
+	# 	# model.build_vocab(sents)  # can be a non-repeatable, 1-pass generator
+	# 	# model.train(sents)  # can be a non-repeatable, 1-pass generator
+	# 	return model
 
 	
