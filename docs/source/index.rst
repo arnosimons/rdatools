@@ -9,13 +9,13 @@ API Reference
 Discourse
 --------------
 
-.. automodule:: rdatools.rdatools.discourse
+.. automodule:: rdatools.discourse
     :members:
 
 TopicModel
 --------------
 
-.. automodule:: rdatools.TopicModel
+.. automodule:: rdatools.tm
     :members:
 
 
