@@ -5,11 +5,14 @@ Discourse
 --------------
 
 .. automodule:: rdatools.discourse
-    :members:
+	:members:
 
-TopicModel
+
+ZoteroCollection
 --------------
+.. automodule:: rdatools.zotero
+	:members:
 
-.. automodule:: rdatools.tm
-    :members:
+
+
 
