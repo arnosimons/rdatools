@@ -44,7 +44,7 @@ class Discourse(object):
 
 	"""
 	A ``Discourse`` contains and manages actors and utterances and all the 
-	relations between them. 
+	relations between them.
 
 	Initialize an empty ``Discourse``::
 
@@ -82,35 +82,66 @@ class Discourse(object):
 	### node level methods
 	##########################################################################
 
-	def _nodes(self, data=True, manual_if=u'', **kwargs):
+	# def _nodes(self, data=True, manual_if=u'', **kwargs):
+	# 	out_type = u'(nid, attr)' if data else u'nid'
+	# 	condition = u' and '.join(
+	# 		(u'u"{0}" in attr and attr[u"{0}"] == u"""{1}"""'.format(
+	# 		k,v.replace('"',"'")) 
+	# 		for k,v in kwargs.iteritems()))	
+	# 	if manual_if:
+	# 		condition = manual_if
+	# 		if kwargs:
+	# 			print u'Key word arguments are ignored because "manual_if" '\
+	# 			'condition is specified'
+	# 	command = u"nodes = [{} for nid, attr in self._graph.nodes_iter(data="\
+	# 		"True) {}]".format(out_type, u' if {}'.format(condition) 
+	# 		if condition else u'')
+	# 	exec(command)
+	# 	return nodes
+
+	def _nodes(self, data=True, attr={}, manual_if=u''):
 		out_type = u'(nid, attr)' if data else u'nid'
-		condition = u' and '.join(
+		attr = u' and '.join(
 			(u'u"{0}" in attr and attr[u"{0}"] == u"""{1}"""'.format(
 			k,v.replace('"',"'")) 
-		for k,v in kwargs.iteritems()))	
+			for k,v in attr.iteritems()))	
 		if manual_if:
-			condition = manual_if
-			if kwargs:
-				print u'Key word arguments are ignored because "manual_if" '\
-				'condition is specified'
-		command = u"nodes = [{} for nid, attr in self._graph.nodes_iter(data="\
-			"True) {}]".format(out_type, u' if {}'.format(condition) 
-			if condition else u'')
+			if attr:
+				print u'attr are ignored because "manual_if" is specified'
+			attr = manual_if
+		command = u'''nodes = [
+				{} for nid, attr in self._graph.nodes_iter(data=True) 
+				{}
+			]'''.format(
+				out_type, 
+				u' if {}'.format(attr) if attr else u''
+			)
 		exec(command)
 		return nodes
 
 	def _node_exists(self, attr):
-		result = list(self._nodes(**attr))
+		result = list(self._nodes(attr=attr))
 		return result[0][0] if result else u''
 
 
 	# actor level methods
 
-	def actors(self, **attr):
-		return self._nodes(kind='actor', **attr)
+	def actors(self, attr={}, data=True):
+		"""
+		Returns the actors of the ``Discourse``.
 
-	def persons(self, **attr):
-		return self.actors(a_type=u'person')
+		Args:
+        data (bool): if True (default), returns actor labels and attributes. 
+        	If False, returns only the labels.
+        attr (dict): Dictionary of actor attributes. 
+        	E.g. {u'name':u'Zappa, Frank'}.
+		"""
+		attr[u'kind'] = u'actor'
+		return self._nodes(attr=attr, data=data)
+
+	def persons(self, attr={}, data=True):
+		attr[u'a_type'] = u'person'
+		return self.actors(attr=attr, data=data)
 
 	def authors(self, **attr):
 		return self._nodes(manual_if=u'self.utterances_actors(edge_attr='\
@@ -171,7 +202,7 @@ class Discourse(object):
 				warnings.warn(u'lastname ignored because actor is not a person')
 				del attr[u'lastname']
 		# add actor node
-		node_exists = self._node_exists(attr)
+		node_exists = self._node_exists(attr=attr)
 		if node_exists:
 			if ignore:
 				return node_exists
@@ -251,7 +282,7 @@ class Discourse(object):
 		# handle node and label stuff
 		if not new_attr[u'name'] == old_attr[u'name'] or special_case:
 			del new_attr[u'label'] # To test (below) if node with identical attributes already exists. But don't del before, since old_attr == new_attr (above) wouldn't work
-			if self._node_exists(new_attr):
+			if self._node_exists(attr=new_attr):
 				if merge:
 					pass # 1) change all references of old node to (existing) target 2) delete old node
 				else:
@@ -279,23 +310,29 @@ class Discourse(object):
 				return c[1]
 		return u''
 
-	def utterances(self, **attr):
-		return self._nodes(kind=u'utterance', **attr)
+	def utterances(self, attr={}, data=True):
+		attr[u'kind'] = u'utterance'
+		return self._nodes(attr=attr, data=data)
 
-	def articles(self, **attr):
-		return self.utterances(u_type=u'journalarticle')
+	def articles(self, attr={}, data=True):
+		attr[u'u_type'] = u'journalarticle'
+		return self.utterances(attr=attr, data=data)
 
-	def books(self, **attr):
-		return self.utterances(u_type=u'book')
+	def books(self, attr={}, data=True):
+		attr[u'u_type'] = u'book'
+		return self.utterances(attr=attr, data=data)
 
-	def chapters(self, **attr):
-		return self.utterances(u_type=u'booksection')
+	def chapters(self, attr={}, data=True):
+		attr[u'u_type'] = u'booksection'
+		return self.utterances(attr=attr, data=data)
 
-	def documents(self, **attr):
-		return self.utterances(u_type=u'document')
+	def documents(self, attr={}, data=True):
+		attr[u'u_type'] = u'document'
+		return self.utterances(attr=attr, data=data)
 
-	def webpages(self, **attr):
-		return self.utterances(u_type=u'webpage')
+	def webpages(self, attr={}, data=True):
+		attr[u'u_type'] = u'webpage'
+		return self.utterances(attr=attr, data=data)
 
 
 	def add_utterance(self, allow_doubles=False, ignore=False, **attr):
@@ -308,7 +345,7 @@ class Discourse(object):
 			raise ValueError(u"Provide title and date!")
 		# add utterance node
 		if not allow_doubles:
-			node_exists = self._node_exists(attr)
+			node_exists = self._node_exists(attr=attr)
 			if node_exists:
 				if ignore:
 					warnings.warn(
@@ -348,7 +385,7 @@ class Discourse(object):
 			if not (new_attr[u'title'] == old_attr[u'title'] 
 				and new_attr[u'date'] == old_attr[u'date']):
 				del new_attr[u'label'] # To test (below) if node with identical attributes already exists. But don't del before, since old_attr == new_attr (above) wouldn't work
-				if self._node_exists(new_attr) and not allow_doubles:
+				if self._node_exists(attr=new_attr) and not allow_doubles:
 					# raise KeyError(u"An utterance with identical attributes already exists. Did you mean merge?")
 					if merge:
 						pass # 1) change all references of old node to (existing) target 2) delete old node
@@ -413,7 +450,7 @@ class Discourse(object):
 				u'if {}'.format(target_attr) if target_attr else u'',
 				u'if {}'.format(edge_attr) if edge_attr else u'',
 				u'if {}'.format(edge_attr_ge) if edge_attr_ge else u'',
-				)
+			)
 		# print command
 		exec(command)
 		return edges
