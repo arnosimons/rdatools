@@ -15,6 +15,15 @@ import os.path
 
 
 VERSION = '0.1.4'
+INSTALL_REQUIRES = [
+    'networkx>=1.11',
+    'textacy>=0.4.1',
+    'textract>=1.6.1',
+    'gensim>=2.3.0',
+    'pyzotero>=1.2.11',
+    'distance>=0.1.3',
+    'ftfy==4.4.3',
+]
 
 __dir__ = os.path.abspath(os.path.dirname(__file__))
 
@@ -70,21 +79,32 @@ setup(
     ],
 
     # What does your project relate to?
-    keywords='discourse analysis, network analysis, citation analysis, textmining',
+    keywords='''
+        rdatools, 
+        discourse analysis, 
+        network analysis, 
+        citation analysis, 
+        textmining,
+        text processing,
+        zotero,
+        bibliometrics,
+        scientometrics,
+        nlp''',
 
     # You can just specify the packages manually here if your project is
     # simple. Or you can use find_packages().
-    # packages=find_packages(exclude=['contrib', 'docs', 'tests']),
+    packages=find_packages(exclude=['docs', 'tests', 'release_and_install', 'issues', 'dist']),
 
     # Alternatively, if you want to distribute just a my_module.py, uncomment
     # this:
-    py_modules=["rdatools"],
+    # py_modules=["rdatools"],
 
     # List run-time dependencies here.  These will be installed by pip when
     # your project is installed. For an analysis of "install_requires" vs pip's
     # requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
-    install_requires=['networkx','pyzotero','textacy', 'ftfy', 'distance'],
+    
+    install_requires=INSTALL_REQUIRES,
 
     # # List additional groups of dependencies here (e.g. development
     # # dependencies). You can install these using the following syntax,
