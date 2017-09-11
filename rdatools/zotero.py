@@ -32,7 +32,7 @@ from rdatools.functions import *
 
 
 class ZoteroCollection(object):
-	def __init__(self, library_id, library_type, api_key, collectionID):
+	def __init__(self, library_id, api_key, collection_id, library_type=u'user', ):
 		### connection
 		self.conn = zotero.Zotero(library_id, library_type, api_key)
 		### attributes
