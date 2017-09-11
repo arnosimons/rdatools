@@ -39,7 +39,7 @@ class ZoteroCollection(object):
 		self.library_id = library_id
 		self.library_type = library_type
 		self.api_key = api_key
-		self.collectionID = collectionID
+		self.collection_id = collection_id
 		self.collection = None
 		self.utterances = None
 		self.cit_notes = None
@@ -48,10 +48,10 @@ class ZoteroCollection(object):
 
 	def refresh(self, from_within=False):
 		print u'\n(Re-)Connecting to Zotero collection "{}" of library "{}"'.\
-			format(self.library_id, self.collectionID) \
+			format(self.library_id, self.collection_id) \
 			if not from_within \
 			else u'\t...(re-)connecting to Zotero collection "{}" of library "{}"'.\
-			format(self.library_id, self.collectionID)
+			format(self.library_id, self.collection_id)
 		item_types = self.conn.item_types()
 		item_type_map = {'attachment': len(item_types) + 101} # 'attachment' is missing in zot.item_types(), so I define it here.
 		for i,t in enumerate(item_types):
@@ -63,7 +63,7 @@ class ZoteroCollection(object):
 				item_type_map[t[u'itemType']] = i
 		self.collection=sorted([item[u'data'] \
 			for item in self.conn.everything(
-				self.conn.collection_items(self.collectionID))], 
+				self.conn.collection_items(self.collection_id))], 
 				key=lambda k: item_type_map[k[u'itemType']])
 		self.utterances= [item for item in self.collection \
 			if not item[u'itemType'] == u'attachment' \

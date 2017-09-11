@@ -627,7 +627,7 @@ class Discourse(object):
 
 	def load_zotero_basic(self, ZC, zotero_refresh=False):
 		print u'\nFetching basic data from Zotero collection: "{}"'. \
-			format(ZC.collectionID)
+			format(ZC.collection_id)
 		count_actors = set()
 		count_utterances = set()
 		if zotero_refresh:
@@ -680,7 +680,7 @@ class Discourse(object):
 			raise ValueError(u'No cit_notes found. Check your Zotero tags and '\
 				u'consider refreshing your ZoteroCollection object')
 		print u'\nFetching citations from Zotero collection: "{}"'.\
-			format(ZC.collectionID)
+			format(ZC.collection_id)
 		if zotero_refresh:
 			print u'\t...refresh Zotero'
 			ZC.refresh()
@@ -893,18 +893,18 @@ class Discourse(object):
 								new_cit[u'title'] = cit_title
 								new_cit[u'date'] = cit_date
 								new_cit[u'creators'] = creators
-								new_cit[u'collections'] = [ZC.collectionID]
+								new_cit[u'collections'] = [ZC.collection_id]
 								new_cit[u'tags'].append(
 									{u'tag': u'RDA new citation'})
 								if not new_cit in self._new_cits:
 									self._new_cits.append(new_cit)
 									print u'\t...no match: "{}" '\
 									'--> saved as potential Zotero upload'.\
-										format(c_label)	
+										format(cit_title)	
 								else:
 									print u'\t...no match: "{}" '\
 									'--> was already saved as potential Zotero upload'.\
-										format(c_label)
+										format(cit_title)
 					else:
 						print u'\t...citations must have 3-4 lines -> ignoring: "{}"'.\
 							format(cit)
