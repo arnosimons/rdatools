@@ -784,7 +784,7 @@ class Discourse(object):
 		### process cit_notes
 		for item in ZC.cit_notes:
 			parent_zot_key = item[u'parentItem']
-			utterance = list(self.utterances(zot_key=parent_zot_key)) # list with format: {label: {attr}}
+			utterance = list(self.utterances(attr={u'zot_key':parent_zot_key})) # list with format: {label: {attr}}
 			
 			if len(utterance) == 1: 
 				utterance = utterance[0][1] # utterance now a dict!
@@ -998,7 +998,7 @@ class Discourse(object):
 				# values = [v for v in parent_attr.itervalues()]
 				# metadata = dict(zip(keys, values))
 				parent_label = [u for u in self.utterances(
-					zot_key=item[u'parentItem'])][0][1][u'label']
+					attr={u'zot_key':item[u'parentItem']})][0][1][u'label']
 				self._graph[parent_label][u'cleantext_path'] = item[u'path'] # Add cleantext path to utterance attr
 				metadata = {u'label':parent_label}
 				metadata.update({u'from_format': item[u'path'].rsplit('.')[1],
