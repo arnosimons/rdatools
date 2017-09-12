@@ -1,3 +1,4 @@
+scipy>=0.17.0
 networkx>=1.11
 textacy>=0.4.1
 textract>=1.6.1
