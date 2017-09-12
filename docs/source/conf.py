@@ -113,21 +113,11 @@ todo_include_todos = False
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-# html_theme = 'sphinx_rtd_theme'
+html_theme = 'sphinx_rtd_theme'
 
 
 ### from: https://github.com/astropy/halotools/issues/154
-# Use the 'Read the Docs' theme on home builds:
-on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
-if on_rtd:
-    # on read the docs, the theme is just called "default"
-    html_theme = 'default'
-
-    # Mock modules as per RTF FAQ to avoid hard C dependencies
-    # the below only works for Python3.3+
-    # from unittest.mock import MagicMock
-    # use this for Python<3.3
-    from mock import Mock as MagicMock
+from mock import Mock as MagicMock
 
     class Mock(MagicMock):
         @classmethod
@@ -135,10 +125,30 @@ if on_rtd:
             return Mock()
 
     # include the names of your minimal required packages here
-    MOCK_MODULES = ['pocketsphinx']
-    sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
-else:
-    html_theme = 'sphinx_rtd_theme'
+MOCK_MODULES = ['textract']
+sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
+# Use the 'Read the Docs' theme on home builds:
+# on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
+# if on_rtd:
+#     # on read the docs, the theme is just called "default"
+#     html_theme = 'default'
+
+#     # Mock modules as per RTF FAQ to avoid hard C dependencies
+#     # the below only works for Python3.3+
+#     # from unittest.mock import MagicMock
+#     # use this for Python<3.3
+#     from mock import Mock as MagicMock
+
+#     class Mock(MagicMock):
+#         @classmethod
+#         def __getattr__(cls, name):
+#             return Mock()
+
+#     # include the names of your minimal required packages here
+#     MOCK_MODULES = ['textract']
+#     sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
+# else:
+#     html_theme = 'sphinx_rtd_theme'
 
 
 
