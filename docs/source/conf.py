@@ -121,13 +121,11 @@ html_theme = 'sphinx_rtd_theme'
 
 ### from: https://github.com/astropy/halotools/issues/154
 from mock import Mock as MagicMock
-
-    class Mock(MagicMock):
-        @classmethod
-        def __getattr__(cls, name):
-            return Mock()
-
-    # include the names of your minimal required packages here
+class Mock(MagicMock):
+    @classmethod
+    def __getattr__(cls, name):
+        return Mock()
+# include the names of your minimal required packages here
 MOCK_MODULES = [
     'networkx',
     'textacy',
@@ -137,6 +135,7 @@ MOCK_MODULES = [
     'distance',
     'ftfy',]
 sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
+
 # Use the 'Read the Docs' theme on home builds:
 # on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
 # if on_rtd:
