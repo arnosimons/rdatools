@@ -35,9 +35,8 @@ sys.path.insert(0, os.path.abspath('.'))
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'sphinx.ext.autodoc',
-    'sphinx.ext.viewcode',
-]
+	'sphinx.ext.autodoc',
+	'sphinx.ext.viewcode',]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -118,47 +117,23 @@ todo_include_todos = False
 # a list of builtin themes.
 html_theme = 'sphinx_rtd_theme'
 
-
-### from: https://github.com/astropy/halotools/issues/154
+# Mock out dependencies
 from mock import Mock as MagicMock
 class Mock(MagicMock):
-    @classmethod
-    def __getattr__(cls, name):
-        return Mock()
+	@classmethod
+	def __getattr__(cls, name):
+		return Mock()
+
 # include the names of your minimal required packages here
 MOCK_MODULES = [
-    'networkx',
-    'textacy',
-    'textract',
-    'gensim',
-    'pyzotero',
-    'distance',
-    'ftfy',]
+	'networkx',
+	'textacy',
+	'textract',
+	'gensim',
+	'pyzotero',
+	'distance',
+	'ftfy',]
 sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
-
-# Use the 'Read the Docs' theme on home builds:
-# on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
-# if on_rtd:
-#     # on read the docs, the theme is just called "default"
-#     html_theme = 'default'
-
-#     # Mock modules as per RTF FAQ to avoid hard C dependencies
-#     # the below only works for Python3.3+
-#     # from unittest.mock import MagicMock
-#     # use this for Python<3.3
-#     from mock import Mock as MagicMock
-
-#     class Mock(MagicMock):
-#         @classmethod
-#         def __getattr__(cls, name):
-#             return Mock()
-
-#     # include the names of your minimal required packages here
-#     MOCK_MODULES = ['textract']
-#     sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
-# else:
-#     html_theme = 'sphinx_rtd_theme'
-
 
 
 # Theme options are theme-specific and customize the look and feel of a theme
@@ -272,10 +247,8 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
-latex_documents = [
-    (master_doc, 'rdatools.tex', u'rdatools Documentation',
-     u'Arno Simons', 'manual'),
-]
+
+latex_documents = [(master_doc, 'rdatools.tex', u'rdatools Documentation', u'Arno Simons', 'manual'),]
 
 # The name of an image file (relative to this directory) to place at the top of
 # the title page.
@@ -302,25 +275,20 @@ latex_documents = [
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [
-    (master_doc, 'rdatools', u'rdatools Documentation',
-     [author], 1)
-]
+man_pages = [(
+	master_doc, 'rdatools', u'rdatools Documentation',[author], 1)]
 
 # If true, show URL addresses after external links.
 #man_show_urls = False
-
 
 # -- Options for Texinfo output -------------------------------------------
 
 # Grouping the document tree into Texinfo files. List of tuples
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
-texinfo_documents = [
-    (master_doc, 'rdatools', u'rdatools Documentation',
-     author, 'rdatools', 'One line description of project.',
-     'Miscellaneous'),
-]
+texinfo_documents = [(
+	master_doc, 'rdatools', u'rdatools Documentation',
+	author, 'rdatools', 'One line description of project.','Miscellaneous'),]
 
 # Documents to append as an appendix to all manuals.
 #texinfo_appendices = []
@@ -333,3 +301,4 @@ texinfo_documents = [
 
 # If true, do not generate a @detailmenu in the "Top" node's menu.
 #texinfo_no_detailmenu = False
+
