@@ -2,26 +2,24 @@ API Reference
 ====================================
 
 
-.. automodule:: app
-
 
 Discourse
 --------------
 
-.. automodule:: rdatools.discourse
+.. automodule:: discourse
 	:members:
 
 
 Corpus
 --------------
 
-.. automodule:: rdatools.corpus
+.. automodule:: corpus
 	:members:
 
 
 ZoteroCollection
 --------------
-.. automodule:: rdatools.zotero
+.. automodule:: zotero
 	:members:
 
 
