@@ -33,7 +33,7 @@ class TopicModel(object):
 	'''
 
 	def __init__(self, terms_list, vectorizer, method=u'nmf', n_topics=20):
-		print '-----> Yo!'
+		print '\n Creating mew topic model'
 		self.vectorizer = vectorizer
 		self.doc_term_matrix = self.vectorizer.fit_transform(terms_list)
 		self.model = textacy.tm.TopicModel(method, n_topics=n_topics)
