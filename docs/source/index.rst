@@ -1,6 +1,10 @@
 API Reference
 ====================================
 
+
+.. automodule:: app
+
+
 Discourse
 --------------
 
