@@ -137,7 +137,7 @@ class Mock(MagicMock):
 MOCK_MODULES = [
 	'networkx',
 	'networkx.readwrite',
-	'networkx.readwrite.json_graph'
+	'networkx.readwrite.json_graph',
 	'textacy',
 	'textract',
 	'gensim',
