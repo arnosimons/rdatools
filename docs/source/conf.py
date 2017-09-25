@@ -15,7 +15,6 @@
 import sys
 import os
 import sphinx_rtd_theme
-from pkg_resources import get_distribution
 
 __version__ = u'0.1.7'
 
@@ -39,7 +38,7 @@ extensions = [
 	'sphinx.ext.viewcode',]
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+# templates_path = ['_templates']
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
@@ -142,7 +141,7 @@ sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 #html_theme_options = {}
 
 # Add any paths that contain custom themes here, relative to this directory.
-# html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
+html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
@@ -248,7 +247,8 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 
-latex_documents = [(master_doc, 'rdatools.tex', u'rdatools Documentation', u'Arno Simons', 'manual'),]
+latex_documents = [(master_doc, 'rdatools.tex', u'rdatools Documentation', 
+	u'Arno Simons', 'manual'),]
 
 # The name of an image file (relative to this directory) to place at the top of
 # the title page.
@@ -276,7 +276,8 @@ latex_documents = [(master_doc, 'rdatools.tex', u'rdatools Documentation', u'Arn
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [(
-	master_doc, 'rdatools', u'rdatools Documentation',[author], 1)]
+	master_doc, 'rdatools', u'rdatools Documentation',
+	[author], 1)]
 
 # If true, show URL addresses after external links.
 #man_show_urls = False
@@ -288,7 +289,8 @@ man_pages = [(
 #  dir menu entry, description, category)
 texinfo_documents = [(
 	master_doc, 'rdatools', u'rdatools Documentation',
-	author, 'rdatools', 'One line description of project.','Miscellaneous'),]
+	author, 'rdatools', 'One line description of project.',
+	'Miscellaneous'),]
 
 # Documents to append as an appendix to all manuals.
 #texinfo_appendices = []
