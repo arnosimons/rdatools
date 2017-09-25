@@ -28,7 +28,7 @@ along with RDAtools.  If not, see <http://www.gnu.org/licenses/>.
 
 import re
 import os
-import textract
+# import textract
 import textacy
 import collections
 import itertools
@@ -198,8 +198,9 @@ def adjacency(links, focus):
 			))
 	return outlist
 
-def read_text(path, read_method=u'textacy'):
-	if read_method == u'textacy':
+def read_text(path, read_method=u'textract'):
+	if read_method == u'textract':
+		import textract
 		text = unicode(textract.process(path)) # http://textract.readthedocs.io/en/latest/python_package.html
 	elif read_method == u'slate':
 		with open(path) as f:
