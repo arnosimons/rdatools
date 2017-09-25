@@ -16,10 +16,9 @@ import sys
 import os
 from datetime import date
 import sphinx_rtd_theme
-import rdatools
 
-VERSION = rdatools.__version__
-AUTHOR = rdatools.__author__
+VERSION = u'0.1.7'
+AUTHOR = u'Arno Simons'
 THIS_YEAR = date.today().year
 
 # If extensions (or modules to document with autodoc) are in another directory,
