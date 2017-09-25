@@ -17,7 +17,7 @@ import os
 import sphinx_rtd_theme
 from pkg_resources import get_distribution
 
-__version__ = get_distribution('rdatools').version
+__version__ = u'0.1.7'
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
