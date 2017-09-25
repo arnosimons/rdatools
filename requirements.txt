@@ -1,4 +1,4 @@
-networkx>=1.11
+networkx==1.11
 textacy>=0.4.1
 textract>=1.6.1
 gensim>=2.3.0

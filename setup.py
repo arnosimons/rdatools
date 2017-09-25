@@ -16,13 +16,12 @@ import os.path
 
 VERSION = '0.1.5'
 INSTALL_REQUIRES = [
-    'networkx>=1.11',
-    'textacy>=0.4.1',
-    'textract>=1.6.1',
-    'gensim>=2.3.0',
-    'pyzotero>=1.2.11',
-    'distance>=0.1.3',
-    'ftfy==4.4.3',
+    'networkx>1,<2',
+    'textacy',
+    'gensim',
+    'pyzotero',
+    'distance',
+    'ftfy',
 ]
 
 __dir__ = os.path.abspath(os.path.dirname(__file__))
@@ -93,7 +92,7 @@ setup(
 
     # You can just specify the packages manually here if your project is
     # simple. Or you can use find_packages().
-    packages=find_packages(exclude=['docs', 'tests', 'release_and_install', 'issues', 'dist']),
+    # packages=find_packages(exclude=['docs', 'tests', 'release_and_install', 'issues', 'dist']),
 
     # Alternatively, if you want to distribute just a my_module.py, uncomment
     # this:
