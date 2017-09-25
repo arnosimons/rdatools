@@ -136,6 +136,8 @@ class Mock(MagicMock):
 # include the names of your minimal required packages here
 MOCK_MODULES = [
 	'networkx',
+	'networkx.readwrite',
+	'networkx.readwrite.json_graph'
 	'textacy',
 	'textract',
 	'gensim',
