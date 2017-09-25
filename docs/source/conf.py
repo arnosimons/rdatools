@@ -61,7 +61,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'rdatools'
-copyright = u'2017 – {}, {}' % (THIS_YEAR, AUTHOR)
+copyright = u'2017 – {}, {}'.format(THIS_YEAR, AUTHOR)
 author = AUTHOR
 
 # The version info for the project you're documenting, acts as replacement for
