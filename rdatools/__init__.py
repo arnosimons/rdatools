@@ -28,7 +28,8 @@ along with RDAtools.  If not, see <http://www.gnu.org/licenses/>.
 from pkg_resources import get_distribution, DistributionNotFound
 
 __author__ = u'Arno Simons'
-__version__ = get_distribution('rdatools').version
+__version__=u'0.1.7'
+# __version__ = get_distribution('rdatools').version
 
 # # https://stackoverflow.com/questions/17583443/what-is-the-correct-way-to-share-package-version-with-setup-py-and-the-package
 # from pkg_resources import get_distribution, DistributionNotFound
