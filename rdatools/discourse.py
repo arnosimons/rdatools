@@ -27,17 +27,22 @@ along with RDAtools.  If not, see <http://www.gnu.org/licenses/>.
 
 
 import re
+import pickle
+import json
 import subprocess
 import textacy
-import networkx as nx
+
 import gensim
 import warnings
 import distance
 import unicodedata
+import networkx as nx
+from networkx.readwrite import json_graph
 
 from rdatools.constants import *
 from rdatools.functions import *
 from rdatools.corpus import Corpus
+from rdatools.zotero import ZoteroCollection
 from rdatools.tm import TopicModel
 
 class Discourse(object):
@@ -54,20 +59,42 @@ class Discourse(object):
 
 	"""
 
-	def __init__(self):
-		# print u'\nYou created a new Discourse ;-)'
-		self._graph = nx.MultiDiGraph()
+	def __init__(self, name, path=None):
+		if not path:
+			path = u''
+		self.name = name
+		self._ZC = None
+		saved_graph = os.path.join(path, u'_'.join([self.name, u'_multidigraph.pickle']))
+		if os.path.isfile(saved_graph):
+			self._graph = nx.read_gpickle(saved_graph)
+		else:
+			self._graph = nx.MultiDiGraph(name=name) # name auch als Graph Attribute?
 		self._corpus = None
-		self._new_cits = []
+		self._new_cits = [] # put into _graph
 
 	def __repr__(self):
 		return u'<Dicourse({} utterances, {} actors)>'.format(
 			len(self.utterances()), 
-			len(self.actors()), 
-			)
+			len(self.actors()), )
 
 	def __len__(self):
 		return len(self.utterances())
+
+	def save(self, path=None):
+		'''
+		saves Discourse by creating/overwriting four files in path:
+		1) "name_node_link.json" holds a networkx MultiDiGraph
+		2) "name_spacy_docs.json" holds textacy.Docs
+		3) "name_metadatas.json" holds metadatas of textacy.Docs
+		4) "name_info.json" holds textacy/spacy metadata
+		'''
+		if not path:
+			# path = u''
+			path = os.path.get_cwd()
+		print u'\nSaving Discourse "{}" here:{}'.format(self.name, path)
+		self._corpus.save(path, name=self.name)
+		nx.write_gpickle(self._graph, 
+			os.path.join(path, u'_'.join([self.name, u'_multidigraph.pickle'])))
 
 
 	### generic methods
@@ -81,29 +108,11 @@ class Discourse(object):
 
 	### node level methods
 	##########################################################################
-
-	# def _nodes(self, data=True, manual_if=u'', **kwargs):
-	# 	out_type = u'(nid, attr)' if data else u'nid'
-	# 	condition = u' and '.join(
-	# 		(u'u"{0}" in attr and attr[u"{0}"] == u"""{1}"""'.format(
-	# 		k,v.replace('"',"'")) 
-	# 		for k,v in kwargs.iteritems()))	
-	# 	if manual_if:
-	# 		condition = manual_if
-	# 		if kwargs:
-	# 			print u'Key word arguments are ignored because "manual_if" '\
-	# 			'condition is specified'
-	# 	command = u"nodes = [{} for nid, attr in self._graph.nodes_iter(data="\
-	# 		"True) {}]".format(out_type, u' if {}'.format(condition) 
-	# 		if condition else u'')
-	# 	exec(command)
-	# 	return nodes
-
 	def _nodes(self, data=True, attr={}, manual_if=u''):
 		out_type = u'(nid, attr)' if data else u'nid'
 		attr = u' and '.join(
-			(u'u"{0}" in attr and attr[u"{0}"] == u"""{1}"""'.format(
-			k,v.replace('"',"'")) 
+			(u'attr.get(u"{0}") == u"""{1}"""'.format(
+			k,v)  
 			for k,v in attr.iteritems()))	
 		if manual_if:
 			if attr:
@@ -114,9 +123,9 @@ class Discourse(object):
 				{}
 			]'''.format(
 				out_type, 
-				u' if {}'.format(attr) if attr else u''
-			)
+				u' if {}'.format(attr) if attr else u'')
 		exec(command)
+		# print command
 		return nodes
 
 	def _node_exists(self, attr):
@@ -205,12 +214,13 @@ class Discourse(object):
 		node_exists = self._node_exists(attr=attr)
 		if node_exists:
 			if ignore:
-				return node_exists
+				# return node_exists
+				return {u'label':node_exists, u'new':False}
 			else:
 				raise KeyError(u"Actor already exists. Did you mean update?")
 		attr[u'label'] = self._make_label_unique(attr[u'name'])
 		self._graph.add_node(attr[u'label'], **attr) # label also appears as attr now!
-		return attr[u'label']
+		return {u'label':attr[u'label'], u'new':True}
 			
 
 	def update_actor(self, label, merge=False, **attr):
@@ -241,7 +251,6 @@ class Discourse(object):
 					new_attr[u'firstname'] = name_split[1]
 				elif u'firstname' in new_attr.iterkeys():
 					del new_attr[u'firstname']
-
 			elif (
 				all(k in attr.iterkeys() for k in [u'firstname', u'lastname']) 
 				or (
@@ -255,7 +264,6 @@ class Discourse(object):
 				):
 				new_attr[u'name'] = ', '.join(
 					[new_attr[u'lastname'], new_attr[u'firstname']])
-
 			elif u'lastname' in attr.iterkeys():
 				new_attr[u'name'] = new_attr[u'lastname']
 			elif not old_attr[u'a_type'] == u'person':
@@ -298,7 +306,7 @@ class Discourse(object):
 			# relabel references to the node in corpus
 		# add utterance node
 		self._graph.add_node(new_attr[u'label'], **new_attr)
-		return new_attr[u'label']
+		return {u'label':attr[u'label']}
 
 
 	# utterance level methods
@@ -334,7 +342,6 @@ class Discourse(object):
 		attr[u'u_type'] = u'webpage'
 		return self.utterances(attr=attr, data=data)
 
-
 	def add_utterance(self, allow_doubles=False, ignore=False, **attr):
 		# initialize attributes: clean, make unicode, delete empty kv pairs, check formatting
 		attr = clean_attr(attr)
@@ -348,16 +355,16 @@ class Discourse(object):
 			node_exists = self._node_exists(attr=attr)
 			if node_exists:
 				if ignore:
-					warnings.warn(
-						u'Utterance already exists. Did you mean update?')
-					return node_exists
+					# warnings.warn(
+					# 	u'Utterance already exists. Did you mean update?')
+					return {u'label':node_exists, u'new':False}
 				else:
 					raise KeyError(
 						u"Utterance already exists. Did you mean update?")
 		attr[u'label'] = self._make_label_unique(
 			make_u_label(date=attr['date'], title=attr[u'title']))
 		self._graph.add_node(attr[u'label'], **attr)
-		return attr[u'label']
+		return {u'label':attr[u'label'], u'new':True}
 
 	def update_utterance(self, label, allow_doubles=False, merge=False, **attr):
 		# initialize attributes: clean, make unicode, delete empty kv pairs, check formatting
@@ -408,7 +415,7 @@ class Discourse(object):
 			# relabel references to the node in corpus
 		# add utterance node
 		self._graph.add_node(new_attr[u'label'], **new_attr)
-		return new_attr[u'label']
+		return {u'label':attr[u'label']}
 
 
 	### edge level methods
@@ -420,22 +427,17 @@ class Discourse(object):
 				else u'(s, t, attr)' if data and not keys \
 				else u'(s, t)'
 		source_attr = u' and '.join(
-			(u'(u"{0}" in self._graph.node[s].iterkeys() and self._graph.node[s]'\
-				'[u"{0}"] == u"""{1}""")'.format(k,v.replace('"',"'"))
+			(u'(self._graph.node[s].get(u"{0}") == u"""{1}""")'.format(k,v)
 				for k,v in source_attr.iteritems()))
 		target_attr = u' and '.join(
-			(u'(u"{0}" in self._graph.node[t].iterkeys() and self._graph.node[t]'\
-				'[u"{0}"] == u"""{1}""")'.format(k,v.replace('"',"'"))  
+			(u'(self._graph.node[t].get(u"{0}") == u"""{1}""")'.format(k,v)  
 				for k,v in target_attr.iteritems()))
 		edge_attr = u' and '.join(
-			(u'(u"{0}" in attr.iterkeys() and attr[u"{0}"] == u"""{1}""")'.format(
-				k,v.replace('"',"'"))
+			(u'(attr.get(u"{0}") == u"""{1}""")'.format(k,v)
 				for k,v in edge_attr.iteritems()))
 		edge_attr_ge = u' and '.join(
-			(u'(u"{0}" in attr.iterkeys() and attr[u"{0}"] >= {1})'.format(
-				k,v.replace('"',"'"))
+			(u'(attr.get(u"{0}") >= {1})'.format(k,v)
 				for k,v in edge_attr_ge.iteritems()))
-		# print source_attr
 		command = u'''edges = [
 				{}
 				for s, tdict in self._graph.adjacency_iter()
@@ -562,7 +564,7 @@ class Discourse(object):
 				repr(attr[u'actor'])))
 		if not self._edge_is_unique(attr):
 			if ignore:
-				warnings.warn(u'Utterance-actor edge already exists.')
+				# warnings.warn(u'Utterance-actor edge already exists.')
 				return
 			else:
 				raise KeyError(
@@ -658,11 +660,17 @@ class Discourse(object):
 			target_attr=target_attr, 
 			edge_attr=edge_attr)
 
-
 	### Zotero related methods
 	##########################################################################
+	def connect_to_zotero(self, library_id, api_key, collection_id, 
+		library_type=u'user'):
+		self._ZC = ZoteroCollection(
+			library_id=library_id, api_key=api_key, collection_id=collection_id, 
+			library_type=u'user')
 
-	def load_zotero_basic(self, ZC, zotero_refresh=False):
+	def load_zotero_basic(self, ZC=None, zotero_refresh=False):
+		if ZC == None:
+			ZC = self._ZC
 		print u'\nFetching basic data from Zotero collection: "{}"'. \
 			format(ZC.collection_id)
 		count_actors = set()
@@ -678,8 +686,11 @@ class Discourse(object):
 			u_attr[u'title'] = item[u'title']
 			u_attr[u'u_type'] = item[u'itemType']
 			u_attr[u'ignore'] = True
-			u_label = self.add_utterance(**u_attr)
-			count_utterances.add(u_label)
+			print u_attr
+			u_node = self.add_utterance(**u_attr)
+			u_label = u_node[u'label']
+			if u_node[u'new']:
+				count_utterances.add(u_label)
 			### fetch actors (creators)
 			counter = 1
 			for creator in item[u'creators']:
@@ -689,12 +700,13 @@ class Discourse(object):
 					last_creatorType = this_creatorType
 				if not last_creatorType == this_creatorType: # matches for each creator type (e.g. 'author' and 'editor')
 					counter = 1
-				a_label = self.add_actor(
+				a_node = self.add_actor(
 					lastname=creator[u'lastName'], 
 					firstname=creator[u'firstName'],
-					ignore=True,
-					)
-				count_actors.add(a_label)
+					ignore=True)
+				a_label = a_node[u'label']
+				if a_node[u'new']:
+					count_actors.add(a_label)
 				self.add_utterance_actor(
 					u_label, 
 					a_label,
@@ -707,12 +719,13 @@ class Discourse(object):
 		print u'\t...{} utterances added'.format(len(count_utterances))
 		print u'\t...{} actors added'.format(len(count_actors))
 
-
-	def load_zotero_citations(self, ZC, zotero_refresh=False,
+	def load_zotero_citations(self, ZC=None, zotero_refresh=False,
 		fuzzy_t=True, fuzzy_y=True, fuzzy_ty=True, 
 		nlev=0.1, title_sim=0.9, date_span=(4,4)):
 		""" loads citations from notes flagged as 'RDA citations' in Zotero collection
 		"""
+		if ZC == None:
+			ZC = self._ZC
 		if not ZC.cit_notes:
 			raise ValueError(u'No cit_notes found. Check your Zotero tags and '\
 				u'consider refreshing your ZoteroCollection object')
@@ -976,11 +989,14 @@ class Discourse(object):
 					print u'\t...cannot interpret this line: "{}"'.format(block)
 	
 
-	def load_zotero_cleantexts(self, ZC, zotero_refresh=False, 
+	def load_zotero_cleantexts(self, ZC=None, zotero_refresh=False, 
 		read_method=u'textacy', **kwargs):
 		print u'\nLoading Zotero cleantexts into corpus'
+		if ZC == None:
+			ZC = self._ZC
 		kwargs = dict(kwargs)
-		if not isinstance(self._corpus, Corpus):
+		# if not isinstance(self._corpus, Corpus):
+		if not self._corpus:
 			print u'\t...making new corpus'
 			self._corpus = Corpus()
 		if zotero_refresh == True:
@@ -999,7 +1015,7 @@ class Discourse(object):
 				# metadata = dict(zip(keys, values))
 				parent_label = [u for u in self.utterances(
 					attr={u'zot_key':item[u'parentItem']})][0][1][u'label']
-				self._graph[parent_label][u'cleantext_path'] = item[u'path'] # Add cleantext path to utterance attr
+				self._graph.node[parent_label][u'cleantext_path'] = item[u'path'] # Add cleantext path to utterance attr
 				metadata = {u'label':parent_label}
 				metadata.update({u'from_format': item[u'path'].rsplit('.')[1],
 								 u'from_path': item[u'path']})
@@ -1008,13 +1024,13 @@ class Discourse(object):
 		else:
 			print u'\t...no cleantexts to load'
 
+
 	### Text analytical methods
 	##########################################################################
 
 	def edit_cleantext(self, label):
 		file = self._graph[label][u'cleantext_path']
 		subprocess.call(['sublime',file])
-
 
 	def make_corpus(self, reset=False):
 		print u'\nMaking new corpus'

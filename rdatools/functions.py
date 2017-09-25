@@ -27,21 +27,31 @@ along with RDAtools.  If not, see <http://www.gnu.org/licenses/>.
 
 
 import re
+import os
 import textract
 import textacy
 import collections
 import itertools
 import ftfy
 import warnings
+import networkx as nx
+
+from StringIO import StringIO
+
 from rdatools.constants import *
 from rdatools.constants import _YEAR
-import networkx as nx
 
 ### deal with unicode shit somehow (sonst muckt text = unicode(textract.process(path)) in read_text() rum)
 import sys
 reload(sys)
 sys.setdefaultencoding(u'utf-8')
 
+def xml_to_root(xml):
+	it = ET.iterparse(StringIO(xml))
+	for _, el in it:
+		if '}' in el.tag:
+			el.tag = el.tag.split('}', 1)[1]  # strip all namespaces
+	return it.root
 
 def sliding_window(seq, n=2):
 	return zip(*(collections.deque(itertools.islice(it, i), 0) or it
@@ -62,14 +72,15 @@ def sliding_window(seq, n=2):
 # 	return (e for e in G.edges(data=True) if e[0] not in stops and e[1] not in stops)
 
 def clean_string(string):
-	return ' '.join(string.split()).lower()
+	# return ' '.join(string.split()).lower()
+	return ' '.join(string.split()).lower().replace(u'"',"'")
 
 def clean_attr(attr,ignore_forbidden=False):
 	if any(k in attr.iterkeys() for k in FORBIDDENKEYS) and not ignore_forbidden:
 		raise KeyError(u"Forbidden attribute keys: {}".format(FORBIDDENKEYS))
 	return {unicode(k): 
 		(clean_string(unicode(v)) 
-			if not k == u'zot_key' 
+			if not k == u'zot_key' and not k == u'zot_collections'
 			and not k == u'name' 
 			else unicode(v) # leave zot_keys the way they are (except empty, see below)
 			if not k == u'name' else u', '.join(unpack_name(unicode(v)))  # remove wiredly spaced commas

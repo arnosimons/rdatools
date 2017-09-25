@@ -1,5 +1,4 @@
-to_do.txt
-
+pubmed.py
 
 *.pyc
 *.DS_Store
@@ -11,5 +10,6 @@ to_do.txt
 /issues
 /build
 /dist
+/documentation
 /rdatools.egg-info
 /release_and_install

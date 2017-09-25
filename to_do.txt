@@ -1,0 +1,87 @@
+
+. save and reload Discourse object/data from disc
+. sense2vec stuff
+. zot_collection attr should not be lower()
+. "conncectors" in coauthors()?!?!?
+. cowords() -> weird output? (u'carbon', u'countries', {'freq': 3.0, 'connectors': {u'2010_the_brave_new_w': 1.5, u'2010_topologies_of_c': 2.6666666666666665}})
+. authors() maybe with utterances?
+. add automatic year attribute!
+. simpler way to add utterance_actor Link than knowing labels already...???
+. PubMed citation context. IDee: 0) given lit of interest -> 1) which PubMed id? -> 2) which docs cite this within PubMed? -> 3) in citing docs: where is PubMed id referenced and which doc specific citation id? -> 4) where in the text is that doc specific citing id referenced? -> 5) yield wind width citation context 
+
+
+. corpus is RAM intensive, no? Consider loading txt files line by line instead? -> e.g. word2vec
+. networkx1 -> nx2 transition???
+. regularly update all dependent packages with "pip install package --upgrade"
+. ---> MODIFY load_zotero_cleantexts: 
+			1) No other attr in metadata than label!
+			2) copy filepaths (raw and clean) to utterance as attr!
+. setter/getter functions
+	. _nodes/_edges/_edges_via:
+		. option to limit getters to particular nodelist (nbunch?), e.g. non-stopwords or mostcited docs
+	. mostcited getter function
+	. forbiddenkeys for add_edge? E.g. 'utterance', 'actor', 'concept', usw.
+	. asymetric: _edges(edge_attr{'k':'v'}) vs. _nodes(k=v)
+	. allow for various outputs: csv, graphml, networkx graph(), list of dics, list of list
+	. creators() functions returning dic with actors as keys and their utternaces as values
+	. update functions:
+		. actor and utterance in au Link (same is True for all other edges respectively) are ALSO kept as attributes! So in case node labels are updated, update these attributes as well!!! AND dont get rid of them, because I need them in checking firstcreators and stuff...since label can be different from actual name!
+		. WEIRD case: Diese beiden concepts sind unterschiedlich gelabeled, weil sie sich minimal in der parserinfo unterscheiden...
+			{u'concept': u'mendenhall, arno\n1887\nThe Characteristix Curve of Composition\nsome rest here', u'kind': u'concept', u'parserinfo': u'a/y/t/r | ln,fn,'}
+			{u'concept': u'mendenhall, arno\n1887\nThe Characteristix Curve of Composition\nsome rest here', u'kind': u'concept', u'parserinfo': u'a/y/t/r | ln,fn;'}
+	. delete functions
+		. nodes/ edges
+		. attributes
+	. solved?:  Now, if item is added whose attr are all same as those of an existing item, uniquness error is raised also if existing item has extra attributes (which arguably make it a different item, at least in context of add_item functions...)
+		-> Write some compare attr function to deal with this issue
+	. utterance_concept: indicate where in utterance the concept is referenced to? By attribute 'position'? (E.g. introduction, reflist...)
+	. self relationships? (utterance contains utterance...)
+
+
+. date:
+	. year coupled to date (also on update!!!) und als FORBIDDENKEY?
+	. handle dates like this  u'2016 jun 02' that Zotero DOES provide!
+	. improve date handling in make_u_label (allow for year, year-month, year-month-day, usw...bis auf minuten/sekunden für whatsapp nachrichten usw.)
+
+
+. corpus
+	. embedd corpus in graph metadata?
+	. link u_fulltext key to corpus.doc value?
+
+. allgemeine Python implementation
+	. Alternative für exec() Functions?
+
+
+. load_zot_citations
+	. add_concept_actor Links?
+	. What if there are no authors in an item in a Zot cit_lists? Should this be allowed? If yes, how to handle this? Prblem: I need a/d/t/r style grammar
+	. Was macht _parse_authors wenn es keine Authors gibt? Wie soll das RDA gramma für diesen Fall aussehen?
+	. How to deal with double entries in Matched Citations? Can happen if two citations are matched to an existing utterance...
+	. Compare docs, e.g. old db vs zotero updated one. Or zot core vs zot notes
+
+
+. clean_str
+	. In Simons et al 2014: string 'http://dx.doi.org/10.1080/09644016.2014.893120' is currently first made to '*URL*10.1080/09644016.2014.893120' and then fails to become '*DOI*'. Solution: Add 'http://dx.doi.org/' to re_doi and process re_doi before re_url
+
+. label handling:
+	. Now labels get *ed to deal with unique constraint. And they keep their stars even if the conflicting non-starred labels are deleted/updated. Ok?
+
+	
+. solved:
+	. sort and numerate connectors in adjacency function?
+
+
+
+
+For Distribution via PyPi (https://packaging.python.org/tutorials/distributing-packages/):
+. Create Source Distribution. From rdatools directory execute: (python setup.py sdist)
+. Create Wheel: (python setup.py bdist_wheel)
+. Upload to PyPi via twine: (twine upload dist/*)
+
+Version numbering: https://www.python.org/dev/peps/pep-0396/
+. When a module (or package) includes a version number, the version SHOULD be available in the __version__ attribute.
+. For modules which live inside a namespace package, the module SHOULD include the __version__ attribute. The namespace package itself SHOULD NOT include its own __version__ attribute.
+. The __version__ attribute's value SHOULD be a string.
+. Module version numbers SHOULD conform to the normalized version format specified in PEP 386 [6].
+. Module version numbers SHOULD NOT contain version control system supplied revision numbers, or any other semantically different version numbers (e.g. underlying library version number).
+. The version attribute in a classic distutils setup.py file, or the PEP 345 [7] Version metadata field SHOULD be derived from the __version__ field, or vice versa.
