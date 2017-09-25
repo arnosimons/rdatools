@@ -14,7 +14,7 @@ import os.path
 
 
 
-VERSION = '0.1.5'
+VERSION = '0.1.6'
 INSTALL_REQUIRES = [
     'networkx>1,<2',
     'textacy',
