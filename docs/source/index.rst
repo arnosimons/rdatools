@@ -6,20 +6,20 @@ API Reference
 Discourse
 --------------
 
-.. automodule:: discourse
+.. automodule:: rdatools.discourse
 	:members:
 
 
 Corpus
 --------------
 
-.. automodule:: corpus
+.. automodule:: rdatools.corpus
 	:members:
 
 
 ZoteroCollection
 --------------
-.. automodule:: zotero
+.. automodule:: rdatools.zotero
 	:members:
 
 
