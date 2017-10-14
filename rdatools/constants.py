@@ -1,29 +1,30 @@
 # -*- coding: utf-8 -*-
-"""
-constants.py
 
-Written by Arno Simons
 
-Released under GNU General Public License, version 3.0
+# constants.py
 
-Copyright (c) 2016-2017 Arno Simons
+# Written by Arno Simons
 
-This file is part of RDAtools.
+# Released under GNU General Public License, version 3.0
 
-RDAtools is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+# Copyright (c) 2016-2017 Arno Simons
 
-RDAtools is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+# This file is part of RDAtools.
 
-You should have received a copy of the GNU General Public License
-along with RDAtools.  If not, see <http://www.gnu.org/licenses/>.
+# RDAtools is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 
-"""
+# RDAtools is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with RDAtools.  If not, see <http://www.gnu.org/licenses/>.
+
+
 
 
 import re
