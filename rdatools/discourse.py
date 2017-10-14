@@ -140,32 +140,56 @@ class Discourse(object):
 		Returns the actors of the ``Discourse``.
 
 		Args:
-        data (bool): if True (default), returns actor labels and attributes. 
-        	If False, returns only the labels.
-        attr (dict): Dictionary of actor attributes. 
-        	E.g. {u'name':u'Zappa, Frank'}.
+	        data (bool): if True (default), returns actor labels and attributes. 
+	        	If False, returns only the labels.
+	        attr (dict): dictionary of actor attributes you can use to narrow search. 
+	        	E.g. {u'name':u'Zappa, Frank'}.
 		"""
 		attr[u'kind'] = u'actor'
 		return self._nodes(attr=attr, data=data)
 
 	def persons(self, attr={}, data=True):
+		"""
+		Returns actors classified as person.
+
+		Args:
+	        data (bool): if True (default), returns actor labels and attributes. 
+	        	If False, returns only the labels.
+	        attr (dict): dictionary of actor attributes you can use to narrow search. 
+	        	E.g. {u'name':u'Zappa, Frank'}.
+		"""
 		attr[u'a_type'] = u'person'
 		return self.actors(attr=attr, data=data)
 
 	def authors(self, **attr):
+		"""
+		Returns actors that have authored at least one utterance.
+		"""
 		return self._nodes(manual_if=u'self.utterances_actors(edge_attr='\
 			'{u"actor":nid, u"relation":u"author"})')
 
 	def editors(self, **attr):
+		"""
+		Returns actors that have edited at least one utterance.
+		"""
 		return self._nodes(manual_if=u'self.utterances_actors(edge_attr='\
 			'{u"actor":nid, u"relation":u"editor"})')
 
 	def contributors(self, **attr):
+		"""
+		Returns actors that have contributed to at least one utterance.
+		"""
 		return self._nodes(manual_if=u'self.utterances_actors(edge_attr='\
 			'{u"actor":nid, u"relation":u"contributor"})')
 
 	def add_actor(self, ignore=False, **attr):
 		'''
+		Adds a new actor to the ``Discourse``. You have to provide at least a 
+		name or lastname, but you can freely other attributes.
+
+		Special attributes:
+
+
 		Name = whole name (person or other)
 		Firstname (only for persons)
 		Lastname  (only for persons)
