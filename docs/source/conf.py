@@ -143,7 +143,18 @@ MOCK_MODULES = [
 	'gensim',
 	'pyzotero',
 	'distance',
-	'ftfy',]
+	'ftfy',
+	'subprocess',
+	'json',
+	'subprocess',
+	'warnings',
+	'unicodedata',
+	'os',
+	'itertools',
+	're',
+	'collections',
+	'StringIO',
+	]
 sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 
 
