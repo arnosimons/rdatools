@@ -149,7 +149,6 @@ MOCK_MODULES = [
 	'subprocess',
 	'warnings',
 	'unicodedata',
-	'os',
 	'itertools',
 	're',
 	'collections',

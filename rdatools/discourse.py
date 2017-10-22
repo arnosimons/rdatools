@@ -873,6 +873,7 @@ class Discourse(object):
 						match_2 = []
 						match_3 = []
 						match_4 = []
+						match_5 = []
 						direct_match = False
 						for nid, attr in self._graph.nodes_iter(data=True):
 							if attr[u'kind'] == u'utterance':
@@ -898,7 +899,7 @@ class Discourse(object):
 														match_type=u'1', 
 														citation=block)
 													direct_match = True
-													break
+													break # is break neccessary here?
 												# 2) fuzzy title, same firstauthor, same year
 												elif distance.nlevenshtein(
 													cit_title, attr[u'title'], 
@@ -913,6 +914,11 @@ class Discourse(object):
 													cit_title, attr[u'title'], 
 													method=2) <= nlev:
 													match_4.append(attr)
+										elif get_year(attr[u'date']) == cit_year \
+											and attr[u'title'] == cit_title:
+											match_5.append(attr)
+
+
 						if not direct_match:
 							if match_2:
 								if len(match_2) == 1:
@@ -956,6 +962,20 @@ class Discourse(object):
 									raise ValueError(
 										u'More than one match for fuzzy year, '\
 										'fuzzy date, same firstauthor')
+							elif match_5:
+								if len(match_5) == 1:
+									print u'\t...match 5, same year and date, '\
+									'different firstauthor: "{}"'.\
+										format(match_5[0][u'label'])
+									self.add_citation(
+										utterance[u'label'], 
+									match_5[0][u'label'], 
+									match_type=u'5', 
+									citation=block)
+								else:
+									raise ValueError(
+										u'More than one match for same year '\
+										'and date, different firstauthor')
 							else:
 								### add to _new_cits
 								creators = [{u'lastName': author[0],
