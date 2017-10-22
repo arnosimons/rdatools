@@ -189,7 +189,6 @@ class Discourse(object):
 
 		Special attributes:
 
-
 		Name = whole name (person or other)
 		Firstname (only for persons)
 		Lastname  (only for persons)

@@ -1,6 +1,8 @@
 
 . zot_collection attr should not be lower()!
 
+. also match ref if title and date are same and author different!
+
 
 . load_zotero_cleantexts: do I need this? Why not more general load_cleantexts() incl checking if ct is already in corpus?
 . zotero and PubMed as objects in Discourse
