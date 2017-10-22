@@ -144,6 +144,7 @@ class Discourse(object):
 	        	If False, returns only the labels.
 	        attr (dict): dictionary of actor attributes you can use to narrow search. 
 	        	E.g. {u'name':u'Zappa, Frank'}.
+
 		"""
 		attr[u'kind'] = u'actor'
 		return self._nodes(attr=attr, data=data)
@@ -157,6 +158,7 @@ class Discourse(object):
 	        	If False, returns only the labels.
 	        attr (dict): dictionary of actor attributes you can use to narrow search. 
 	        	E.g. {u'name':u'Zappa, Frank'}.
+	    
 		"""
 		attr[u'a_type'] = u'person'
 		return self.actors(attr=attr, data=data)
